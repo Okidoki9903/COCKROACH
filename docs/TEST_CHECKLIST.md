@@ -41,6 +41,20 @@ godot --headless --path . --quit-after 120  # lance ~2 s puis quitte
 - [ ] *Projet → Paramètres → Application → Exécuter* : scène principale
       = `res://scenes/boot/boot.tscn`.
 
+## Fichiers générés par Godot à la première ouverture
+
+- `.godot/` : cache local, déjà ignoré par `.gitignore`. Ne pas committer.
+- `*.uid` à côté des scripts (Godot 4.4+), et attributs `uid=` ajoutés
+  aux scènes et à `project.godot` : **committer**.
+- `icon.svg`, s'il est créé : facultatif, committer s'il est conservé.
+- `*.import`, uniquement quand des assets seront ajoutés : **committer**.
+
+## Historique
+
+| Date | Environnement | Godot | Résultat |
+|---|---|---|---|
+| 2026-09-28 | Conteneur distant | Absent | Bloqué ; seul le contrôle statique a été fait (voir PROJECT_STATE) |
+
 ## Résultat
 
 Consigner dans `docs/PROJECT_STATE.md` : version exacte, date, cases

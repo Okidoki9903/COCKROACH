@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche A (socle du projet)._
+_Dernière mise à jour : 2026-09-28 — tentative de validation du socle (bloquée : Godot absent)._
 
 ## Version du moteur
 
@@ -57,6 +57,28 @@ caméra devra conserver une valeur de cet ordre.
 | Lancement de la scène, erreurs console | **Non exécutée** |
 | Cadrage et lisibilité de l'échelle | **Non exécutée** |
 
+### Tentative de validation — 2026-09-28
+
+Environnement : conteneur Linux distant. Recherche de Godot : `which godot
+godot4 Godot godot-headless`, recherche de fichiers `*godot*` sur tout le
+disque, flatpak, snap. Résultat : **aucun exécutable**, seulement des
+définitions de type MIME (`/usr/share/mime/application/x-godot-*.xml`).
+Statut : **bloquée**. Aucun fichier du projet n'a été modifié.
+
+Contrôle statique exécuté par script, sans le moteur :
+
+| Contrôle | Résultat |
+|---|---|
+| `run/main_scene` pointe vers un fichier existant | OK |
+| La cible de `boot.gd` (`scale_test.tscn`) existe | OK |
+| Chaque `SubResource`/`ExtResource` utilisé est défini ; aucun inutilisé ni en double | OK (2 scènes) |
+| Fichiers des `ext_resource` présents | OK |
+| `load_steps` cohérent | OK |
+| Chaque nœud a un parent déclaré avant lui | OK |
+
+Ce contrôle ne garantit ni que Godot accepte les propriétés, ni le rendu.
+Il n'y a eu aucun import, aucun lancement et aucune inspection visuelle.
+
 **L'étape A n'est pas validée** tant que la checklist `docs/TEST_CHECKLIST.md`
 n'a pas été passée dans Godot.
 
@@ -68,7 +90,9 @@ n'a pas été passée dans Godot.
 
 ## Prochaine tâche
 
-1. Passer `docs/TEST_CHECKLIST.md` dans Godot et consigner la version exacte.
+1. Passer `docs/TEST_CHECKLIST.md` dans un environnement où Godot 4 stable est
+   installé (machine locale, ou environnement distant dont le script
+   d'installation fournit Godot), puis consigner la version exacte.
 2. Puis tâche **B — Player : entrées du joueur** (actions nommées dans
    l'`InputMap`, adaptateur d'entrées). Ne pas la commencer avant la
-   validation de l'étape A.
+   validation de l'étape A. **Tâche B : en attente.**
