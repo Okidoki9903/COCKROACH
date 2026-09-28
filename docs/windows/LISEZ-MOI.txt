@@ -1,0 +1,88 @@
+COCKROACH - prototype jouable (Windows x86_64)
+===============================================
+
+Version : commit 9c14156 (tâche J) + export Windows, Godot 4.7.2-stable.
+Ce n'est pas un jeu fini : blocs gris, sons synthétiques provisoires.
+
+IMPORTANT : cette version a été exportée et vérifiée sous Linux, mais
+elle n'a PAS été lancée sur Windows. Le lancement sur un vrai PC reste à
+vérifier.
+
+
+LANCEMENT
+---------
+1. Dézipper tout le dossier (COCKROACH.exe et COCKROACH.pck doivent
+   rester côte à côte).
+2. Double-cliquer sur COCKROACH.exe.
+   - Windows SmartScreen peut avertir (exécutable non signé) :
+     « Informations complémentaires » puis « Exécuter quand même ».
+   - Il faut une carte graphique compatible Vulkan ou Direct3D 12
+     (moteur Godot, rendu Forward+).
+3. Le jeu démarre directement dans la cuisine, au fond du refuge.
+   Si la fenêtre s'ouvre sans avoir le focus, le jeu se met en pause :
+   cliquer dans la fenêtre, puis appuyer sur Échap.
+   Casque conseillé.
+
+
+OBJECTIF
+--------
+Tu es un cafard de 3 cm. Sors du refuge, bois au point d'eau (sous
+l'évier), prends une miette au biscuit (près du frigo) et rapporte-la au
+refuge, sans te faire attraper par l'humain.
+- L'humain fait sa ronde. S'il te voit assez longtemps, il te cherche,
+  puis tente de t'attraper.
+- Le dessous des meubles et de la chaise te protège.
+- « ⚠ ATTAQUE — BOUGE ! » : tu as 0,7 s. Si tu étais immobile, pars tout
+  de suite. Si tu marchais, change franchement de direction (continuer
+  tout droit ou s'arrêter, c'est être pris).
+- Sous la lumière (« ☀ Exposé à la lumière »), l'humain te confirme plus
+  vite s'il te voit. Ce badge ne veut pas dire que tu es repéré.
+- Indices : arcs « pas » (un pas proche et sa direction), « ? fouille »
+  (l'humain inspecte près de toi).
+
+
+COMMANDES (touches selon leur position, AZERTY ou QWERTY)
+---------------------------------------------------------
+Z Q S D (AZERTY) / W A S D (QWERTY)  se déplacer
+Souris                               regarder
+Maj                                  sprint (impossible en portant une miette)
+E                                    prendre, boire, déposer (l'action s'affiche en bas)
+A (AZERTY) / Q (QWERTY)              lâcher la miette
+Échap                                pause + libère la souris
+                                     (volumes, réglages d'instinct,
+                                     « Réinitialiser la session »)
+F3                                   afficher / masquer le diagnostic (masqué au départ)
+
+Recommencer : après une capture ou une réussite, cliquer sur
+« Recommencer ». À tout moment : Échap puis « Réinitialiser la session ».
+
+Réglages en pause :
+- Volume : Général, Humain, Ambiance.
+- Indices d'instinct : Intensité, Mouvement réduit, Indices renforcés
+  (pour jouer sans son).
+
+
+TESTER LA LUMIÈRE (diagnostic)
+------------------------------
+Une lampe éclaire le sol entre le refuge et la chaise. Elle est allumée
+au départ.
+1. Appuyer sur F3 : le diagnostic apparaît.
+   - À droite : « LUMIÈRE allumée/éteinte », l'exposition et le nombre
+     de points du corps éclairés (sur 3), et la vitesse de confirmation
+     (×1,5 si le cafard est exposé).
+   - À gauche : l'état de l'humain et les derniers sons.
+2. Appuyer sur Échap pour libérer la souris.
+3. Cliquer sur « Basculer la lumière (diagnostic) » : la flaque de
+   lumière disparaît (ou revient).
+4. Échap pour reprendre, F3 pour masquer le diagnostic.
+
+À essayer : sous l'assise de la chaise, dans la flaque, le diagnostic
+indique 0/3 points éclairés (la chaise fait de l'ombre).
+
+
+CE QUI N'A PAS ÉTÉ VÉRIFIÉ
+--------------------------
+- Lancement et performances sur Windows, sur une vraie carte graphique.
+- Les sons n'ont jamais été écoutés par personne (seulement mesurés).
+- Confort des commandes, lisibilité des indices, difficulté de la
+  première capture.

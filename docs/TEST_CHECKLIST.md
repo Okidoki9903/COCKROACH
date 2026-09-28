@@ -294,6 +294,31 @@ Manuel, sur machine réelle : `kitchen_instinct.tscn`, puis
 | Recommencer plusieurs fois | aucun indice ni lumière en double | ✅ automatisé |
 | Première capture | comprise et esquivable | ⏳ **non évalué** |
 
+## Export Windows (version jouable)
+
+Modèles officiels 4.7.2-stable, dont le SHA-512 est vérifié dans
+`SHA512-SUMS.txt`. Seuls `version.txt` et
+`windows_{release,debug}_x86_64.exe` sont extraits dans
+`~/.local/share/godot/export_templates/4.7.2.stable/`.
+
+```sh
+$G --headless --path . --export-release "Windows Desktop" build/windows/COCKROACH.exe
+$G --headless --verbose --main-pack build/windows/COCKROACH.pck --quit-after 300   # doit charger kitchen_instinct
+```
+
+- La scène de départ exportée vient de
+  `application/run/main_scene.playable`, une fonctionnalité propre au
+  preset. L'éditeur, F5 et les tests gardent `boot.tscn`.
+- `build/` est ignoré par git.
+
+| Contrôle | Résultat |
+|---|---|
+| Export | code 0 ; `COCKROACH.exe` identique octet pour octet au modèle officiel (pas de modification de ressources), `COCKROACH.pck` 293 Ko, sans scènes de test |
+| Pack lancé par le moteur Linux 4.7.2 | charge directement `kitchen_instinct` ; aucune erreur ni avertissement |
+| Pack rendu sous Xvfb, touches et clics réels (xdotool) | départ au refuge sans diagnostic, marche, Échap (pause), F3, clic sur « Basculer la lumière » : la flaque s'éteint |
+| `.exe` sous Wine 9.0 | **plante au démarrage**, même pour `--version` (lecture nulle dans le `kernelbase.dll` de Wine) : incompatibilité de Wine, non concluante |
+| Windows réel | ⏳ **non vérifié** |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |

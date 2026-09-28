@@ -162,6 +162,18 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
 
+## Version jouable Windows — 2026-09-28
+
+Construite à partir de 9c14156, sans nouvelle fonctionnalité :
+- `export_presets.cfg` (preset « Windows Desktop », x86_64) ;
+- une substitution de scène principale réservée à l'export ;
+- `docs/windows/LISEZ-MOI.txt` ;
+- captures dans `docs/validation/windows/`.
+
+Le ZIP (`build/COCKROACH_windows_x86_64.zip`, 38 Mo) n'est pas versionné.
+Le lancement sous Windows **n'a pas été vérifié** ; voir
+`TEST_CHECKLIST.md`, « Export Windows ».
+
 ## Vérifications tâche J — 2026-09-28
 
 | Type | Méthode | Résultat |

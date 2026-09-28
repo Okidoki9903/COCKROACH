@@ -9,6 +9,9 @@ config_version=5
 config/name="COCKROACH"
 config/description="Prototype : aventure de survie et d'infiltration 3D à l'échelle d'un cafard."
 run/main_scene="res://scenes/boot/boot.tscn"
+; Exported build only (custom feature "playable", export_presets.cfg):
+; starts the playable kitchen. The editor and the tests keep boot.tscn.
+run/main_scene.playable="res://scenes/levels/kitchen_instinct.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [display]
