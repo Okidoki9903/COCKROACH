@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tests/scale_test.tscn" id="1_scale"]
+[ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2_input"]
+[ext_resource type="Script" path="res://scripts/game/pause_controller.gd" id="3_pause"]
+[ext_resource type="Script" path="res://scripts/ui/input_debug_panel.gd" id="4_panel"]
+
+[node name="InputTest" type="Node"]
+
+[node name="ScaleTest" parent="." instance=ExtResource("1_scale")]
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("2_input")
+
+[node name="PauseController" type="Node" parent="." node_paths=PackedStringArray("player_input")]
+script = ExtResource("3_pause")
+player_input = NodePath("../PlayerInput")
+
+[node name="DebugLayer" type="CanvasLayer" parent="."]
+
+[node name="InputDebugPanel" type="Label" parent="DebugLayer" node_paths=PackedStringArray("player_input")]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 360.0
+offset_bottom = 140.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+script = ExtResource("4_panel")
+player_input = NodePath("../../PlayerInput")

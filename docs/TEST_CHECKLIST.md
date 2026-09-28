@@ -1,4 +1,4 @@
-# Checklist de test — Étape A (socle)
+# Checklist de test
 
 Version du moteur fixée : **Godot 4.7.2-stable, édition standard officielle**
 (`4.7.2.stable.official.ed1daf0bf`). Rendu cible : Forward+ (Vulkan).
@@ -77,12 +77,38 @@ Capture de référence :
   **committer**.
 - `*.import`, quand des assets seront ajoutés : **committer**.
 
+## Étape B — entrées joueur
+
+Automatique (à relancer après toute modification des entrées) :
+
+```sh
+$G --headless --path . res://scenes/tests/input_test_runner.tscn   # attendu : code 0, 57/57
+```
+
+Manuel, sur machine réelle : lancer `scenes/tests/input_test.tscn` (F6) et
+lire le panneau en haut à gauche.
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Z/W seul, puis S, Q/A, D | (0 ; 1), (0 ; −1), (−1 ; 0), (1 ; 0) | ✅ simulé · ✅ X11 partiel · ⏳ clavier physique |
+| Diagonale | longueur 1,00 | ✅ simulé · ✅ X11 · ⏳ clavier physique |
+| Opposés | 0 | ✅ simulé · ✅ X11 (W+D+S) · ⏳ clavier physique |
+| Relâcher tout | 0 | ✅ simulé · ✅ X11 · ⏳ clavier physique |
+| Maj gauche, puis Maj droite | sprint ON | ✅ simulé (gauche) · ⏳ clavier physique (les deux) |
+| E maintenu | interact +1 seulement | ✅ simulé (répétitions) · ✅ X11 · ⏳ clavier physique |
+| A (AZERTY) ou Q (QWERTY) | drop +1, pas de déplacement | ✅ simulé · ✅ X11 (Q) · ⏳ AZERTY physique |
+| Échap, puis E et ZQSD | PAUSED, compteurs et vecteur figés à 0 | ✅ simulé · ✅ X11 · ⏳ clavier physique |
+| Échap à nouveau | running | ✅ simulé · ✅ X11 · ⏳ clavier physique |
+| Z enfoncé + Alt+Tab, relâcher, revenir | PAUSED, vecteur 0, pas de reprise seule | ✅ simulé · ✅ X11 · ⏳ bureau réel |
+| Scène principale (F5) | inchangée | ✅ rendu identique au pixel près |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
 |---|---|---|---|
 | 2026-09-28 | Conteneur distant | Absent | Bloqué ; contrôle statique seul |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Import et exécution OK ; ombre du repère invisible → corrigée ; capture validée |
+| 2026-09-28 | Conteneur distant, Xvfb + xdotool | 4.7.2-stable | Tâche B : 57/57 simulés, contrôles X11 OK, aucune régression du rendu |
 
 ## Script d'installation pour un environnement distant
 
@@ -102,5 +128,6 @@ curl -sSLO "$BASE/$ZIP"
 grep " $ZIP\$" SHA512-SUMS.txt | sha512sum -c -
 unzip -oq "$ZIP"
 apt-get update -q && apt-get install -y -q xvfb mesa-vulkan-drivers libvulkan1
+# Optionnel, pour piloter la fenêtre sous Xvfb : xdotool x11-utils imagemagick
 "$DEST/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --version
 ```

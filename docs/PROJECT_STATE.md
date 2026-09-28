@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — validation du socle avec Godot 4.7.2._
+_Dernière mise à jour : 2026-09-28 — tâche B (entrées joueur) terminée._
 
 ## Version du moteur (fixée)
 
@@ -19,10 +19,14 @@ version passe par `docs/DECISIONS.md`.
 
 Le socle s'importe et s'exécute sans erreur ni avertissement dans Godot
 4.7.2. `boot` charge `scale_test`. Le rendu Forward+ a été capturé et
-inspecté. Il n'y a aucun système de gameplay.
+inspecté.
 
 **Étape A : validée pour l'import, l'exécution et le rendu Forward+ logiciel.**
-Il reste des contrôles sur machine avec écran (voir plus bas). Ils ne bloquent pas la tâche B.
+**Étape B : terminée.** Une couche d'entrées clavier (InputMap, `PlayerInput`,
+`PauseController`) et sa scène de test existent. Le cafard ne se déplace pas.
+Voir `docs/CONTROLS.md`.
+
+Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche C.
 
 ## Éléments du projet
 
@@ -30,7 +34,14 @@ Il reste des contrôles sur machine avec écran (voir plus bas). Ils ne bloquent
 |---|---|
 | `project.godot` | Configuration ; scène principale = `scenes/boot/boot.tscn` |
 | `scenes/boot/boot.tscn` + `scripts/boot/boot.gd` (+ `.uid`) | Point d'entrée qui charge la scène de test |
-| `scenes/tests/scale_test.tscn` | Scène de vérification d'échelle |
+| `scenes/tests/scale_test.tscn` | Scène de vérification d'échelle (référence visuelle, inchangée) |
+| `scripts/player/player_input.gd` | `PlayerInput` : intentions du joueur lues depuis l'InputMap |
+| `scripts/game/pause_controller.gd` | `PauseController` : pause, reprise, pause sur perte de focus |
+| `scripts/ui/input_debug_panel.gd` | Panneau de diagnostic des entrées (lecture seule) |
+| `scenes/tests/input_test.tscn` | Scène de test des entrées (instancie `scale_test`) |
+| `scenes/tests/input_test_runner.tscn` + `scripts/tests/input_test_runner.gd` | Test automatique des entrées |
+| `docs/CONTROLS.md` | Commandes, interface des composants, convention des axes |
+| `docs/.gdignore` | Empêche Godot d'importer la documentation comme ressource |
 | `data/`, `assets/` | Dossiers réservés (vides, `.gitkeep`) |
 | `docs/DECISIONS.md` | Décisions de production |
 | `docs/TEST_CHECKLIST.md` | Procédure de lancement, contrôles et historique |
@@ -48,7 +59,40 @@ Il reste des contrôles sur machine avec écran (voir plus bas). Ils ne bloquent
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
 
-## Vérifications — 2026-09-28
+## Vérifications tâche B — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Importation | `--headless --import` | Code 0, aucune erreur ni avertissement |
+| Test automatique (simulé) | `input_test_runner.tscn` : `Input.parse_input_event`, routage par le moteur | **57/57**, code 0 |
+| Validité du test | Deux défauts injectés : répétitions acceptées, pause ignorée | Détectés : 53/57 et 54/57, code 1 ; code restauré |
+| Régression, exécution | Scène principale headless, `--quit-after 120` | Code 0 ; `boot` charge `scale_test` |
+| Régression, rendu | Capture Forward+ de la scène principale, comparée à la capture de référence | **Identique au pixel près** |
+| Rendu de la scène de test | Capture Forward+ | Seule la zone du panneau diffère de la référence ; panneau lisible |
+| Événements X11 réels | Xvfb + xdotool (XTest), captures du panneau | Voir ci-dessous |
+
+Couvert par le test automatique : chaque direction seule, 4 diagonales
+(longueur 1, 45°), opposés annulés, relâchement, positions physiques AZERTY,
+sprint maintenu et répété, interact/drop une fois malgré 5 répétitions,
+pause et reprise par Échap (répétitions d'Échap ignorées), intentions
+neutres et aucun signal pendant la pause, panneau actif pendant la pause,
+perte de focus (pause, intentions et actions relâchées), retour du focus
+sans reprise, repère cafard immobile.
+
+Événements X11 réels (le serveur X transmet les touches à Godot, mais ce
+n'est pas un clavier physique) : diagonale W+D = (0,71 ; 0,71) ; W+D+S =
+(1 ; 0) ; relâchement = 0 ; W+Maj = avant et sprint ; E et Q comptés une
+fois par pression (espacement de 150 ms) ; E maintenu 2 s = 1. Perte de
+focus vers une autre fenêtre avec W et Maj enfoncés : pause, intentions à
+zéro, rien de bloqué après relâchement hors fenêtre, pas de reprise au
+retour du focus, Échap reprend.
+
+Constats (voir `docs/CONTROLS.md`, « Limites connues ») : fusion par X11 de
+pressions espacées de quelques ms ; `xdotool windowfocus` sans gestionnaire
+de fenêtres déclenche une pause (artefact de test). Au lancement, la scène
+démarre bien non pausée.
+
+## Vérifications socle — 2026-09-28
 
 Environnement : conteneur Ubuntu 24.04 x86_64, sans écran ni GPU. Godot est
 installé hors du dépôt (`/home/user/tools/godot/4.7.2/`). Pour le rendu :
@@ -90,8 +134,11 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour B)
+## Vérifications restantes (non bloquantes pour C)
 
+- Tâche B, sur machine réelle avec clavier physique : ZQSD sur AZERTY et WASD
+  sur QWERTY, Maj gauche et droite, E, A (AZERTY) ou Q (QWERTY), Échap,
+  Alt+Tab avec une touche enfoncée, répétition réelle d'une touche maintenue.
 - Lancement interactif (F5) sur une machine avec GPU réel.
 - Contrôles dans l'éditeur (voir `docs/TEST_CHECKLIST.md`), puis commit des
   `uid=` que l'éditeur ajoutera aux scènes.
@@ -108,5 +155,4 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche **B — Player : entrées du joueur** (actions nommées dans l'`InputMap`,
-adaptateur d'entrées). **Prête à commencer ; non commencée.**
+Tâche **C — Camera : suivi en troisième personne**. **Non commencée.**
