@@ -50,9 +50,11 @@ size = Vector3(0.1, 0.002, 0.003)
 environment = SubResource("Environment_env")
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 2, 0)
+transform = Transform3D(0.6, 0.524, -0.605, 0, 0.756, 0.655, 0.8, -0.393, 0.453, 0, 2, 0)
 shadow_enabled = true
-directional_shadow_max_distance = 5.0
+shadow_bias = 0.02
+shadow_normal_bias = 0.5
+directional_shadow_max_distance = 1.5
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)

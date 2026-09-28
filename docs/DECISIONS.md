@@ -9,6 +9,8 @@
 | D5 | Contrôleur cinématique, pas de physique des pattes | Contrôle précis et stable | Actée, implémentation tâche D |
 | D6 | Suspicion globale séparée de la détection immédiate | Éviter les échecs perçus comme arbitraires | Actée, implémentation tâches F et K |
 | D7 | Aucun plugin externe au démarrage | Réduire les dépendances | Actée |
+| D8 | Version fixée : Godot 4.7.2-stable (standard) | Dernière stable au 2026-09-28 ; import, exécution et rendu Forward+ validés | Actée |
+| D9 | Ombres directionnelles réglées pour l'échelle millimétrique (biais 0,02, biais normal 0,5, distance 1,5 m) | Avec les valeurs par défaut, un objet de 6 mm ne projette aucune ombre visible | Actée ; à réévaluer avec la caméra mobile (tâche C) |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development
