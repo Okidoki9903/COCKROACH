@@ -15,6 +15,7 @@ ce qui les rend indépendantes de la disposition du clavier.
 | `interact` | E | E | une fois par pression |
 | `drop` | Q | A | une fois par pression |
 | `pause` | Échap | Échap | une fois par pression (bascule) |
+| `toggle_debug` | F3 | F3 | masque ou affiche le panneau de diagnostic du niveau (tâche E) |
 
 Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque

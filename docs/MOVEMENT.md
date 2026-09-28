@@ -104,11 +104,30 @@ Vérifié : le pivot de la caméra est sur le joueur à chaque tick (écart
 1. **Latence d'entrée dépendante du rendu.** `PlayerInput` ne se
    rafraîchissait que dans `_process`. Les ticks physiques précédant
    `_process` dans une image lisaient l'intention de l'image précédente.
-   Avec rendu réel à environ 25 images/s, la distance après 90 ticks
-   variait de 1 à 3 ticks (−2,7 à −8 mm). Correction : rafraîchissement
-   aussi dans `_physics_process`, en priorité −2. Résultat : 0,233332 m
-   identique à 20, 45 et 120 images/s en rendu, et avec 30 à 217 images
-   en headless.
+   Avec rendu réel (environ 14 à 18 images/s mesurées), la distance après
+   90 ticks variait de 1 à 3 ticks (−2,7 à −8 mm). Correction :
+   rafraîchissement aussi dans `_physics_process`, en priorité −2.
+   Résultat : 0,233332 m dans tous les essais (voir le tableau ci-dessous).
+
+   **Essais de fréquence (journaux de la tâche D).** La fréquence physique
+   est fixe (60 Hz ; 90 ticks = 1,5 s). « Limite » = `Engine.max_fps`
+   configuré ; « mesurée » = images traitées pendant les 90 ticks, divisées
+   par 1,5 s.
+
+   | Mode | Limite configurée | Images en 1,5 s | Fréquence mesurée | Distance après correction |
+   |---|---|---|---|---|
+   | Rendu (lavapipe) | 20 | 25 | ≈ 17 i/s | 0,233332 m |
+   | Rendu (lavapipe) | 45 | 22 | ≈ 15 i/s | 0,233332 m |
+   | Rendu (lavapipe) | 120 | 24 | ≈ 16 i/s | 0,233332 m |
+   | Headless | 20 | 30 | 20 i/s | 0,233332 m |
+   | Headless | 240 | 217 | ≈ 145 i/s | 0,233332 m |
+
+   Conclusion limitée : en rendu, la fréquence réelle n'a **pas** varié
+   (15 à 17 i/s, plafonnée par le rendu logiciel quelle que soit la limite).
+   Ces essais montrent seulement un fonctionnement correct avec plusieurs
+   ticks par image. L'indépendance à la fréquence d'images n'est démontrée
+   qu'en headless (20 à 145 i/s). Sur un GPU réel au-delà de 60 i/s :
+   **en attente**.
 2. **Respiration de la caméra dans les passages.** Dans un passage de
    section constante, la distance caméra oscillait de 31,7 à 38,7 mm, avec
    des sauts jusqu'à 5,6 mm par tick. Cause : le bruit de mesure du bras

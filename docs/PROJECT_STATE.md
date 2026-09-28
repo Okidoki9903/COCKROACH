@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche D (locomotion) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche E (blockout de cuisine) terminée._
 
 ## Version du moteur (fixée)
 
@@ -34,7 +34,12 @@ et scène `camera_test`. Le cafard ne se déplace toujours pas. Voir
 `PlayerMotor`), marche à 0,08 m/s et sprint à 0,16 m/s relatifs à la
 caméra, parcours `movement_test`. Voir `docs/MOVEMENT.md`.
 
-Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche E.
+**Étape E : terminée.** Blockout de cuisine `scenes/levels/kitchen_blockout.tscn`
+(≈ 2,0 × 1,25 m) : refuge dans le mur, route directe (1,60 m, 20 s en marche),
+route couverte sous les meubles (2,40 m, 30 s), bascule, détour vers l'eau, et
+repères inertes de nourriture et d'eau. Voir `docs/LEVEL_BLOCKOUT.md`.
+
+Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche G.
 
 ## Éléments du projet
 
@@ -60,6 +65,12 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | `scenes/tests/movement_test_runner.tscn` + `.gd` | Scénarios de locomotion (47) et contrôle d'indépendance au rendu |
 | `scenes/tests/movement_capture.tscn` + `.gd` | Séquences rendues |
 | `docs/MOVEMENT.md` | Locomotion : corps, mesures de collision, paramètres, limites |
+| `scenes/levels/kitchen_blockout.tscn` | Blockout de cuisine, lançable séparément |
+| `tools/gen_kitchen_blockout.py` | Outil de création hors ligne de la scène de cuisine |
+| `scripts/ui/level_debug_panel.gd` | Panneau de niveau : position, chronomètre de trajet, retours ; F3 |
+| `scenes/tests/kitchen_route_runner.tscn` + `.gd` | Parcours automatisé des routes, captures |
+| `docs/LEVEL_BLOCKOUT.md` | Plan, dimensions, routes, temps, limites |
+| `docs/validation/kitchen/*.jpg` | Plan annoté, vues à hauteur de cafard, séquence |
 | `docs/validation/movement/sequences_4.7.2.jpg` | Captures de référence |
 | `docs/validation/camera/*.jpg` | Captures de référence caméra |
 | `docs/.gdignore` | Empêche Godot d'importer la documentation comme ressource |
@@ -80,6 +91,20 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
 
+## Vérifications tâche E — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Traversabilité | `kitchen_route_runner` : 4 routes × aller/retour × marche/sprint | **52/52** ; 16 trajets arrivés, jamais bloqués, caméra jamais dans le décor |
+| Visuel de 3 cm | Boîte du visuel testée contre le décor à chaque tick | 0 pénétration sur 17 972 ticks |
+| Temps (marche, aller) | Même runner | Directe 20,1 s / 1,60 m ; couverte 30,1 s / 2,40 m (33 % plus court) |
+| Rendu | Plan annoté, 8 vues, vue d'ensemble, séquence de la route couverte | 2 défauts de lisibilité corrigés : destination et refuge invisibles de loin |
+| Non-régression | B 57/57, C 54/54, D 47/47 ; scène principale | OK ; **identique au pixel près** |
+
+Défauts de test corrigés en cours de route : contrôle caméra fait avant
+`_process` (même piège qu'en tâche C) ; critère « bloqué » déclenché par un
+demi-tour.
+
 ## Vérifications tâche D — 2026-09-28
 
 | Type | Méthode | Résultat |
@@ -87,7 +112,7 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Collision à petite échelle | Cylindre, capsule et sphère ; marges de 1 à 0,1 mm, sur le même parcours | Cylindre et 0,2 mm retenus ; 0,1 mm bloque le corps ; la capsule pénètre de 2,5 mm |
 | Scénarios de locomotion | `movement_test_runner` (`--fixed-fps 60`) | **47/47**, stable sur 3 exécutions ; 47/47 aussi en temps réel |
 | Validité du test | 3 défauts injectés : cap tiré de la caméra 3D, visuel suivant la caméra, accélération ×2 | Tous détectés |
-| Indépendance au rendu | 90 ticks, max_fps 20/45/120 (rendu réel) et 20/240 (headless) | 0,233332 m partout, après correction |
+| Indépendance au rendu | 90 ticks à 60 Hz physique ; limites max_fps 20/45/120 en rendu (fréquence mesurée 15–17 i/s dans les trois cas) et 20/240 en headless (mesurée 20 et ≈ 145 i/s) | 0,233332 m partout, après correction. Démontrée pour 20–145 i/s en headless seulement ; en rendu, la fréquence n'a pas varié. GPU réel au-delà de 60 i/s : en attente (détail dans `docs/MOVEMENT.md`) |
 | Non-régression | B 57/57 ; C 54/54 (×2) ; scène principale, capture de référence | OK ; **identique au pixel près** |
 | Événements X11 réels | Xvfb + xdotool : Z, Maj, Échap, souris, perte de focus | Marche 0,080, sprint 0,160, arrêt ; position figée en pause ; rien de bloqué après perte de focus |
 | Rendu | 5 séquences personnage + caméra | Pas de clipping ; caméra stable dans le passage |
@@ -190,7 +215,12 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour E)
+## Vérifications restantes (non bloquantes pour G)
+
+- Tâche E, à l'écran avec clavier et souris : compréhension de la première
+  sortie, lisibilité de la destination et du retour, choix entre les deux
+  routes, monotonie du tunnel sous les meubles, confort des rapprochements
+  caméra aux virages serrés, visibilité de la prise-repère à 1,5 m.
 
 - Tâche D, clavier/souris/écran réels : confort des vitesses (0,08 et
   0,16 m/s), nervosité de l'accélération (0,1 s) et du freinage (0,08 s),
@@ -227,4 +257,4 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche **E — World : cuisine en volumes simples**. **Non commencée.**
+Tâche **G — Gameplay systems : ressources et retour**. **Non commencée.**

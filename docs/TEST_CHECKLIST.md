@@ -153,6 +153,29 @@ Manuel, sur machine réelle : lancer `scenes/tests/movement_test.tscn` (F6).
 | Confort global des vitesses | à juger | ⏳ |
 | Écran à plus de 60 Hz | fluidité du suivi | ⏳ non testable ici |
 
+## Étape E — blockout de cuisine
+
+Automatique :
+
+```sh
+$G --headless --fixed-fps 60 --path . res://scenes/tests/kitchen_route_runner.tscn   # attendu : code 0, 52/52
+```
+
+Manuel, sur machine réelle : lancer `scenes/levels/kitchen_blockout.tscn` (F6).
+F3 masque le panneau ; Échap libère la souris pour les boutons.
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Première sortie du refuge | on comprend où sortir et vers où aller | ✅ capture · ⏳ joueur réel |
+| Route directe, aller et retour, marche puis sprint | ≈ 20 s / 10 s, destination visible en route | ✅ automatisé · ✅ capture · ⏳ joueur réel |
+| Route couverte, aller et retour | ≈ 30 s / 15 s, jamais bloqué, caméra sans clipping | ✅ automatisé · ✅ séquence · ⏳ confort réel |
+| Bascule par la brèche du milieu | possible dans les deux sens | ✅ automatisé |
+| Détour vers l'eau | accessible, retour possible | ✅ automatisé |
+| Pieds de meuble, pied de chaise, coins | pas d'accroc, visuel qui ne traverse pas | ✅ automatisé (0 pénétration) · ⏳ joueur réel |
+| Rotations de caméra dans les endroits étroits | rapprochements acceptables | ⏳ confort réel |
+| Retour au refuge depuis la nourriture | repère visible, chemin compris | ✅ capture (prise murale) · ⏳ joueur réel |
+| Tunnel sous les meubles | pas monotone au point de gêner | ⏳ jugement manuel |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -162,6 +185,7 @@ Manuel, sur machine réelle : lancer `scenes/tests/movement_test.tscn` (F6).
 | 2026-09-28 | Conteneur distant, Xvfb + xdotool | 4.7.2-stable | Tâche B : 57/57 simulés, contrôles X11 OK, aucune régression du rendu |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche C : 54/54 ; défaut de dégagement près des murs → corrigé ; B 57/57 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche D : 47/47 ; marge 1 mm → 0,2 mm, latence d'entrée et respiration caméra corrigées ; B 57/57, C 54/54 ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche E : 52/52 ; deux repères de lisibilité ajoutés ; B 57/57, C 54/54, D 47/47 ; référence identique |
 
 ## Script d'installation pour un environnement distant
 

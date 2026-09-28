@@ -23,6 +23,10 @@
 | D19 | Marche 0,08 m/s, sprint 0,16 m/s, montée 0,1 s, arrêt 0,08 s | Valeurs de départ vérifiées ; confort à juger | Provisoire |
 | D20 | `PlayerInput` rafraîchi aussi en physique (priorité −2) | Supprime une latence dépendante de la fréquence de rendu | Actée (tâche D) |
 | D21 | Retour caméra lissé (0,15 s) et fenêtré (10 ticks) | Supprime la respiration de la caméra dans les passages | Actée (tâche D) |
+| D22 | Portion de cuisine d'environ 2,0 × 1,25 m au lieu de 1,2 × 0,8 m | Nécessaire pour 20 s (directe) et 30 s (couverte) en marche | Provisoire ; à juger en jeu |
+| D23 | Route couverte = dessous des meubles bas, derrière une plinthe en retrait à trois brèches | Couverture crédible, bascule possible, 10 cm de hauteur pour la caméra | Actée (tâche E) |
+| D24 | Repères de nourriture et de refuge visibles de loin (biscuit de 3 cm, prise murale) | Les repères plats étaient invisibles à hauteur de cafard | Actée (tâche E) |
+| D25 | Scènes de parcours écrites par des outils hors ligne (`tools/*.py`) | Dimensions exactes et modifiables ; aucune génération à l'exécution | Actée |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development
