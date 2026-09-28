@@ -20,8 +20,9 @@ Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 `drop` est lié au Q *physique*. Le test automatique vérifie ces deux points.
 
-Souris : aucune action à cette étape. L'orientation de la caméra appartient
-à la tâche C. Manette : hors périmètre.
+Souris (tâche C) : le mouvement relatif oriente la caméra. Il ne passe pas
+par une action InputMap : `PlayerInput` lit directement
+`InputEventMouseMotion`. Voir `docs/CAMERA.md`. Manette : hors périmètre.
 
 ## `PlayerInput` (`scripts/player/player_input.gd`)
 
@@ -34,6 +35,9 @@ Composant `Node` qui lit uniquement des actions InputMap et ne déplace rien.
 | `interact_pressed` | signal | Émis une fois par pression, jamais sur répétition clavier |
 | `drop_pressed` | signal | Idem |
 | `pause_requested` | signal | Demande de bascule de pause (Échap) |
+| `consume_look()` | `Vector2` | Rotation demandée depuis l'appel précédent, en radians (x = droite, y = haut) |
+| `look_sensitivity` | export | Radians par pixel (0,003) |
+| `invert_look_y` | export | Inversion verticale |
 
 **Convention des axes de `move_vector`** (espace écran/caméra, pas espace
 monde) :
@@ -56,6 +60,9 @@ n'est émis. `pause_requested` reste actif, pour pouvoir reprendre.
   les actions de gameplay, car une touche relâchée hors de la fenêtre
   n'envoie jamais d'événement de relâchement.
 - Retour du focus : **ne reprend pas** la partie. Échap est nécessaire.
+- `capture_mouse` (export, faux par défaut) : souris capturée pendant le
+  jeu, libérée en pause et à la perte de focus, recapturée seulement à la
+  reprise explicite.
 - Aucun menu.
 
 ## Scène de test des entrées
@@ -87,11 +94,14 @@ $G --headless --path . res://scenes/tests/input_test_runner.tscn
 
 ## Limites connues
 
-- Deux pressions de la même touche espacées de quelques millisecondes
-  seulement sont fusionnées par le backend X11 de Godot, qui les prend
-  pour une répétition clavier. Observé avec xdotool (0 ms : 3 pressions
-  comptées 1 ; 150 ms : 3 pressions comptées 3). C'est hors du rythme d'un
-  humain, mais à garder en tête pour des tests automatisés sous X11.
+- Test X11 avec xdotool : 3 pressions envoyées sans délai ont été comptées
+  une seule fois ; avec 150 ms d'écart, 3 sur 3. 150 ms n'est **pas** une
+  limite humaine établie : des appuis rapides réels peuvent être plus
+  serrés. L'origine de la fusion reste **à confirmer**. Hypothèse non
+  vérifiée : le backend X11 de Godot interprète un relâchement suivi d'un
+  appui immédiat comme une répétition ; ce pourrait aussi venir de xdotool.
+  La logique clavier n'est pas modifiée tant qu'aucun défaut n'est
+  reproduit avec un vrai clavier (contrôle manuel en attente).
 - Sous Xvfb sans gestionnaire de fenêtres, `xdotool windowfocus` provoque
   un événement de perte de focus, donc une pause. C'est un artefact de
   l'environnement de test, pas un défaut du jeu.

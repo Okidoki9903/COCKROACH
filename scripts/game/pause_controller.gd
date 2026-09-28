@@ -2,6 +2,8 @@ class_name PauseController
 extends Node
 ## Toggles the scene tree pause on request and pauses on focus loss.
 ## Regaining focus never resumes by itself.
+## With capture_mouse, the mouse is captured while running and released
+## while paused (including after focus loss); only a resume recaptures it.
 
 signal paused_changed(paused: bool)
 
@@ -13,6 +15,7 @@ const GAMEPLAY_ACTIONS: Array[StringName] = [
 ]
 
 @export var player_input: PlayerInput
+@export var capture_mouse := false
 
 
 func _init() -> void:
@@ -22,6 +25,7 @@ func _init() -> void:
 func _ready() -> void:
 	if player_input:
 		player_input.pause_requested.connect(toggle)
+	_apply_mouse_mode()
 
 
 func toggle() -> void:
@@ -32,7 +36,13 @@ func set_paused(value: bool) -> void:
 	if get_tree().paused == value:
 		return
 	get_tree().paused = value
+	_apply_mouse_mode()
 	paused_changed.emit(value)
+
+
+func _apply_mouse_mode() -> void:
+	if capture_mouse:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if get_tree().paused else Input.MOUSE_MODE_CAPTURED
 
 
 func _notification(what: int) -> void:

@@ -1,0 +1,290 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/camera/camera_rig.tscn" id="1_rig"]
+[ext_resource type="Script" path="res://scripts/player/player_input.gd" id="2_input"]
+[ext_resource type="Script" path="res://scripts/game/pause_controller.gd" id="3_pause"]
+[ext_resource type="Script" path="res://scripts/ui/camera_debug_panel.gd" id="4_panel"]
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 1
+background_color = Color(0.07, 0.07, 0.09, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.45, 0.45, 0.5, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.72, 0.7, 0.64, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.55, 0.57, 0.6, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.42, 0.3, 0.2, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="Mesh_Floor"]
+material = SubResource("Mat_floor")
+size = Vector3(2, 0.02, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_Floor"]
+size = Vector3(2, 0.02, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_BackWall"]
+material = SubResource("Mat_wall")
+size = Vector3(2, 0.3, 0.04)
+
+[sub_resource type="BoxShape3D" id="Shape_BackWall"]
+size = Vector3(2, 0.3, 0.04)
+
+[sub_resource type="BoxMesh" id="Mesh_LeftWall"]
+material = SubResource("Mat_wall")
+size = Vector3(0.04, 0.3, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_LeftWall"]
+size = Vector3(0.04, 0.3, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_CabinetBody"]
+material = SubResource("Mat_wood")
+size = Vector3(0.5, 0.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="Shape_CabinetBody"]
+size = Vector3(0.5, 0.4, 0.4)
+
+[sub_resource type="BoxMesh" id="Mesh_CabinetLegFL"]
+material = SubResource("Mat_wood")
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxShape3D" id="Shape_CabinetLegFL"]
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_CabinetLegFR"]
+material = SubResource("Mat_wood")
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxShape3D" id="Shape_CabinetLegFR"]
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_CabinetLegBL"]
+material = SubResource("Mat_wood")
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxShape3D" id="Shape_CabinetLegBL"]
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_CabinetLegBR"]
+material = SubResource("Mat_wood")
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxShape3D" id="Shape_CabinetLegBR"]
+size = Vector3(0.03, 0.1, 0.03)
+
+[sub_resource type="BoxMesh" id="Mesh_PassageWallL"]
+material = SubResource("Mat_wall")
+size = Vector3(0.02, 0.04, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_PassageWallL"]
+size = Vector3(0.02, 0.04, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_PassageWallR"]
+material = SubResource("Mat_wall")
+size = Vector3(0.02, 0.04, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_PassageWallR"]
+size = Vector3(0.02, 0.04, 0.3)
+
+[sub_resource type="BoxMesh" id="Mesh_PassageLid"]
+material = SubResource("Mat_wood")
+size = Vector3(0.09, 0.01, 0.3)
+
+[sub_resource type="BoxShape3D" id="Shape_PassageLid"]
+size = Vector3(0.09, 0.01, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_target"]
+albedo_color = Color(0.35, 0.16, 0.08, 1)
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_target"]
+material = SubResource("Mat_target")
+size = Vector3(0.012, 0.006, 0.03)
+
+[sub_resource type="BoxShape3D" id="Shape_target"]
+size = Vector3(0.012, 0.006, 0.03)
+
+[node name="CameraTest" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.6, 0.524, -0.605, 0, 0.756, 0.655, 0.8, -0.393, 0.453, 0, 2, 0)
+shadow_enabled = true
+shadow_bias = 0.02
+shadow_normal_bias = 0.5
+directional_shadow_max_distance = 1.5
+
+[node name="Level" type="Node3D" parent="."]
+
+[node name="Floor" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/Floor"]
+mesh = SubResource("Mesh_Floor")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/Floor"]
+shape = SubResource("Shape_Floor")
+
+[node name="BackWall" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.92)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/BackWall"]
+mesh = SubResource("Mesh_BackWall")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/BackWall"]
+shape = SubResource("Shape_BackWall")
+
+[node name="LeftWall" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.92, 0.15, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/LeftWall"]
+mesh = SubResource("Mesh_LeftWall")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/LeftWall"]
+shape = SubResource("Shape_LeftWall")
+
+[node name="CabinetBody" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.3, -0.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/CabinetBody"]
+mesh = SubResource("Mesh_CabinetBody")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/CabinetBody"]
+shape = SubResource("Shape_CabinetBody")
+
+[node name="CabinetLegFL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.27, 0.05, -0.32)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/CabinetLegFL"]
+mesh = SubResource("Mesh_CabinetLegFL")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/CabinetLegFL"]
+shape = SubResource("Shape_CabinetLegFL")
+
+[node name="CabinetLegFR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.73, 0.05, -0.32)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/CabinetLegFR"]
+mesh = SubResource("Mesh_CabinetLegFR")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/CabinetLegFR"]
+shape = SubResource("Shape_CabinetLegFR")
+
+[node name="CabinetLegBL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.27, 0.05, -0.68)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/CabinetLegBL"]
+mesh = SubResource("Mesh_CabinetLegBL")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/CabinetLegBL"]
+shape = SubResource("Shape_CabinetLegBL")
+
+[node name="CabinetLegBR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.73, 0.05, -0.68)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/CabinetLegBR"]
+mesh = SubResource("Mesh_CabinetLegBR")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/CabinetLegBR"]
+shape = SubResource("Shape_CabinetLegBR")
+
+[node name="PassageWallL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.465, 0.02, 0.45)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/PassageWallL"]
+mesh = SubResource("Mesh_PassageWallL")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/PassageWallL"]
+shape = SubResource("Shape_PassageWallL")
+
+[node name="PassageWallR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.535, 0.02, 0.45)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/PassageWallR"]
+mesh = SubResource("Mesh_PassageWallR")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/PassageWallR"]
+shape = SubResource("Shape_PassageWallR")
+
+[node name="PassageLid" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.035, 0.45)
+
+[node name="Mesh" type="MeshInstance3D" parent="Level/PassageLid"]
+mesh = SubResource("Mesh_PassageLid")
+
+[node name="Collision" type="CollisionShape3D" parent="Level/PassageLid"]
+shape = SubResource("Shape_PassageLid")
+
+[node name="TestPositions" type="Node3D" parent="."]
+
+[node name="Ouvert" type="Marker3D" parent="TestPositions"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, -0.2, 0, 0.4)
+gizmo_extents = 0.02
+
+[node name="Mur" type="Marker3D" parent="TestPositions"]
+transform = Transform3D(-1.0, 0, 0.0, 0, 1, 0, -0.0, 0, -1.0, -0.3, 0, -0.86)
+gizmo_extents = 0.02
+
+[node name="Coin" type="Marker3D" parent="TestPositions"]
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -0.86, 0, -0.86)
+gizmo_extents = 0.02
+
+[node name="SousMeuble" type="Marker3D" parent="TestPositions"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 0.5, 0, -0.5)
+gizmo_extents = 0.02
+
+[node name="PassageEtroit" type="Marker3D" parent="TestPositions"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 0.5, 0, 0.42)
+gizmo_extents = 0.02
+
+[node name="Target" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="Mesh" type="MeshInstance3D" parent="Target"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.003, 0)
+mesh = SubResource("Mesh_target")
+
+[node name="Collision" type="CollisionShape3D" parent="Target"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.003, 0)
+shape = SubResource("Shape_target")
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("2_input")
+
+[node name="PauseController" type="Node" parent="." node_paths=PackedStringArray("player_input")]
+script = ExtResource("3_pause")
+player_input = NodePath("../PlayerInput")
+capture_mouse = true
+
+[node name="CameraRig" parent="." node_paths=PackedStringArray("target", "player_input") instance=ExtResource("1_rig")]
+target = NodePath("../Target")
+player_input = NodePath("../PlayerInput")
+
+[node name="DebugLayer" type="CanvasLayer" parent="."]
+
+[node name="CameraDebugPanel" type="PanelContainer" parent="DebugLayer" node_paths=PackedStringArray("rig", "target", "positions_root")]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 420.0
+offset_bottom = 300.0
+script = ExtResource("4_panel")
+rig = NodePath("../../CameraRig")
+target = NodePath("../../Target")
+positions_root = NodePath("../../TestPositions")
+
+[node name="VBox" type="VBoxContainer" parent="DebugLayer/CameraDebugPanel"]
+
+[node name="Readout" type="Label" parent="DebugLayer/CameraDebugPanel/VBox"]
+
+[node name="Buttons" type="VBoxContainer" parent="DebugLayer/CameraDebugPanel/VBox"]

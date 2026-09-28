@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche B (entrées joueur) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche C (caméra) terminée._
 
 ## Version du moteur (fixée)
 
@@ -25,8 +25,12 @@ inspecté.
 **Étape B : terminée.** Une couche d'entrées clavier (InputMap, `PlayerInput`,
 `PauseController`) et sa scène de test existent. Le cafard ne se déplace pas.
 Voir `docs/CONTROLS.md`.
+**Étape C : terminée.** `CameraRig` troisième personne (SpringArm3D), regard
+à la souris dans `PlayerInput`, capture de la souris dans `PauseController`,
+et scène `camera_test`. Le cafard ne se déplace toujours pas. Voir
+`docs/CAMERA.md`.
 
-Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche C.
+Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche D.
 
 ## Éléments du projet
 
@@ -41,6 +45,12 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | `scenes/tests/input_test.tscn` | Scène de test des entrées (instancie `scale_test`) |
 | `scenes/tests/input_test_runner.tscn` + `scripts/tests/input_test_runner.gd` | Test automatique des entrées |
 | `docs/CONTROLS.md` | Commandes, interface des composants, convention des axes |
+| `scenes/camera/camera_rig.tscn` + `scripts/camera/camera_rig.gd` | `CameraRig` réutilisable |
+| `scenes/tests/camera_test.tscn` + `scripts/ui/camera_debug_panel.gd` | Scène de test caméra et boutons de position |
+| `scenes/tests/camera_test_runner.tscn` + `.gd` | Test automatique caméra |
+| `scenes/tests/camera_capture.tscn` + `.gd` | Captures de rendu reproductibles |
+| `docs/CAMERA.md` | Caméra : structure, réglages, imprécision des collisions, limites |
+| `docs/validation/camera/*.jpg` | Captures de référence caméra |
 | `docs/.gdignore` | Empêche Godot d'importer la documentation comme ressource |
 | `data/`, `assets/` | Dossiers réservés (vides, `.gitkeep`) |
 | `docs/DECISIONS.md` | Décisions de production |
@@ -58,6 +68,29 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche C — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Test automatique (simulé) | `camera_test_runner.tscn` | **54/54**, stable sur 3 exécutions ; 5 contrôles de mode souris ignorés en headless, vérifiés sous X11 |
+| Validité du test | 3 défauts injectés : regard × delta, regard actif en pause, retour instantané | Tous détectés ; code restauré |
+| Non-régression B | `input_test_runner.tscn` | 57/57 |
+| Non-régression socle | Scène principale headless, puis capture Forward+ comparée à la référence | Code 0 ; **identique au pixel près** |
+| Rendu | `camera_capture.tscn` : 5 positions, tangages extrêmes, rotation de 24 pas le long du mur | Voir `docs/validation/camera/` |
+| Événements X11 réels | Xvfb + xdotool : souris relative, Échap, perte de focus | 100 px → −17,2° ; 50 px haut → +8,6° ; rien en pause ni hors focus ; pas de saut à la reprise ; pointeur bloqué au centre si capturé, libre sinon |
+
+Défauts trouvés et corrigés pendant la tâche :
+
+1. Face à un mur, la caméra passait à 1,2 mm de la surface, et jusqu'à
+   25 images sur 144 avaient le plan proche en contact avec le décor.
+   Cause : l'imprécision de `cast_motion` à cette échelle, plus la marge du
+   `SpringArm3D` qui ne s'applique pas à une caméra non enfant. Correction :
+   sphère de 6 mm, marge de 3 mm appliquée par le rig. Résultat : 0 image
+   fautive.
+2. Test : `SceneTree.process_frame` est émis avant les `_process()`. Les
+   contrôles lisaient un état jamais rendu. Correction : contrôles exécutés
+   depuis un `_process` de priorité maximale, après une étape physique.
 
 ## Vérifications tâche B — 2026-09-28
 
@@ -134,7 +167,13 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour C)
+## Vérifications restantes (non bloquantes pour D)
+
+- Tâche C, souris physique et GPU réel : confort de la sensibilité (0,003
+  rad/px), sens de rotation, absence de saut à la reprise, tremblement
+  éventuel en rotation lente contre un mur, fluidité sur écran de plus de
+  60 Hz, clic sur les boutons pendant la pause, Alt+Tab.
+- Tâche C, performance : non mesurée (rendu logiciel uniquement).
 
 - Tâche B, sur machine réelle avec clavier physique : ZQSD sur AZERTY et WASD
   sur QWERTY, Maj gauche et droite, E, A (AZERTY) ou Q (QWERTY), Échap,
@@ -149,10 +188,13 @@ tous OK.
 - Aucune icône de projet.
 - Caméra fixe provisoire, sans script ; elle sera remplacée à la tâche C.
 - Pas de collision sur le repère cafard (pas de gameplay).
+- Collisions millimétriques : `cast_motion` pénètre de 2 à 4 mm (voir
+  `docs/CAMERA.md`). C'est un risque direct pour le contrôleur de la tâche D.
 - Le conteneur distant est éphémère. Godot et lavapipe devront être
   réinstallés à chaque nouvelle session (voir le script dans
   `docs/TEST_CHECKLIST.md`).
 
 ## Prochaine tâche
 
-Tâche **C — Camera : suivi en troisième personne**. **Non commencée.**
+Tâche **D — Movement : locomotion**. **Non commencée.** Commencer par
+mesurer l'imprécision des collisions pour un corps de 3 cm.

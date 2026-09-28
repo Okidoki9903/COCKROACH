@@ -7,6 +7,11 @@ extends Node
 ##   y > 0 = forward (move_forward), y < 0 = backward (move_backward)
 ## Length never exceeds 1. Mapping to 3D is the movement task's job.
 ##
+## Look intention (mouse): consume_look() returns the rotation requested
+## since the last call, in radians: x > 0 = turn right, y > 0 = look up.
+## It is a distance already measured by the mouse, so it must never be
+## multiplied by delta time.
+##
 ## Runs while the tree is paused so it can still forward pause requests,
 ## but every gameplay intention is neutral and no gameplay signal is
 ## emitted while paused or after focus loss.
@@ -15,8 +20,14 @@ signal interact_pressed
 signal drop_pressed
 signal pause_requested
 
+## Radians of rotation per pixel of mouse motion.
+@export_range(0.0005, 0.02, 0.0005) var look_sensitivity := 0.003
+@export var invert_look_y := false
+
 var move_vector := Vector2.ZERO
 var sprint_held := false
+
+var _look_accum := Vector2.ZERO
 
 
 func _init() -> void:
@@ -31,7 +42,21 @@ func _process(_delta: float) -> void:
 	sprint_held = Input.is_action_pressed(&"sprint")
 
 
+## Returns the look rotation accumulated since the last call and resets it.
+func consume_look() -> Vector2:
+	var look := _look_accum
+	_look_accum = Vector2.ZERO
+	return look
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		if not _gameplay_blocked():
+			# screen_relative ignores viewport stretch: same feel at any resolution.
+			var rel: Vector2 = event.screen_relative
+			_look_accum.x += rel.x * look_sensitivity
+			_look_accum.y += (rel.y if invert_look_y else -rel.y) * look_sensitivity
+		return
 	# is_action_pressed() ignores key-repeat echoes by default.
 	if event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
@@ -59,3 +84,4 @@ func _gameplay_blocked() -> bool:
 func _clear() -> void:
 	move_vector = Vector2.ZERO
 	sprint_held = false
+	_look_accum = Vector2.ZERO

@@ -14,6 +14,10 @@
 | D10 | Touches liées par position physique (WASD = ZQSD) | Une seule configuration pour QWERTY et AZERTY | Actée (tâche B) |
 | D11 | Pause = `SceneTree.paused` ; perte de focus met en pause sans reprise automatique | Aucune intention bloquée, reprise volontaire | Actée (tâche B) |
 | D12 | `move_vector` en espace écran : x = droite, y = avant | Séparer lecture des entrées et conversion 3D (tâche D) | Actée (tâche B) |
+| D13 | Caméra : SpringArm3D en mesure seule ; caméra rapprochée immédiatement, retour à 0,3 m/s | Rapprochement sans traverser, retour sans à-coup ; testé | Actée (tâche C) |
+| D14 | Sonde de 6 mm et marge de 3 mm appliquée par le rig | Compense l'imprécision mesurée de `cast_motion` à l'échelle du mm | Actée ; à revoir si l'origine de l'imprécision est trouvée |
+| D15 | Rotation appliquée dans `_physics_process` | Le bras mesure toujours l'orientation courante | Provisoire ; à revoir si saccades constatées au-delà de 60 Hz |
+| D16 | Capture souris dans `PauseController` (`capture_mouse`) | Une seule logique de pause ; aucune reprise automatique | Actée (tâche C) |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

@@ -102,6 +102,30 @@ lire le panneau en haut à gauche.
 | Z enfoncé + Alt+Tab, relâcher, revenir | PAUSED, vecteur 0, pas de reprise seule | ✅ simulé · ✅ X11 · ⏳ bureau réel |
 | Scène principale (F5) | inchangée | ✅ rendu identique au pixel près |
 
+## Étape C — caméra
+
+Automatique :
+
+```sh
+$G --headless --path . res://scenes/tests/camera_test_runner.tscn   # attendu : code 0, 54/54
+$G --headless --path . res://scenes/tests/input_test_runner.tscn    # non-régression B : 57/57
+```
+
+Manuel, sur machine réelle : lancer `scenes/tests/camera_test.tscn` (F6).
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Souris à droite / en haut | la vue tourne à droite / regarde en haut | ✅ simulé · ✅ X11 · ⏳ souris physique |
+| Tangage extrême | bloqué à −70° / +10°, jamais retourné | ✅ simulé · ⏳ souris physique |
+| Boutons Mur, Coin, PassageEtroit | caméra rapprochée, aucun mur traversé | ✅ simulé · ✅ capture · ⏳ GPU réel |
+| Tour complet contre un mur | pas de décor coupé, pas de tremblement gênant | ✅ simulé (0/576 image fautive) · ✅ capture · ⏳ confort réel |
+| Obstacle retiré | retour progressif (≈ 0,4 s) | ✅ simulé |
+| Échap | souris libre, vue figée, boutons cliquables | ✅ simulé · ✅ X11 · ⏳ souris physique |
+| Échap à nouveau | souris capturée, **aucun saut** | ✅ simulé · ✅ X11 · ⏳ souris physique |
+| Alt+Tab en bougeant la souris, retour | reste en pause, souris libre, pas de saut à la reprise | ✅ simulé · ✅ X11 · ⏳ bureau réel |
+| Écran à plus de 60 Hz | rotation fluide | ⏳ non testable ici |
+| Performance | 60 images/s sur la machine de référence | ⏳ non mesurée (rendu logiciel) |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -109,6 +133,7 @@ lire le panneau en haut à gauche.
 | 2026-09-28 | Conteneur distant | Absent | Bloqué ; contrôle statique seul |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Import et exécution OK ; ombre du repère invisible → corrigée ; capture validée |
 | 2026-09-28 | Conteneur distant, Xvfb + xdotool | 4.7.2-stable | Tâche B : 57/57 simulés, contrôles X11 OK, aucune régression du rendu |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche C : 54/54 ; défaut de dégagement près des murs → corrigé ; B 57/57 ; référence identique |
 
 ## Script d'installation pour un environnement distant
 
