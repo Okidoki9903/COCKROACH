@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche I (première couche audio) terminée techniquement._
+_Dernière mise à jour : 2026-09-28 — tâche J (instinct visuel et lumière) terminée techniquement._
 
 ## Version du moteur (fixée)
 
@@ -64,6 +64,22 @@ ajouté (`inspecting`). Les essais de capture sont clarifiés dans
 confort, localisation perçue et lisibilité non validés. Voir
 `docs/AUDIO.md`.
 
+**Étape J : terminée techniquement, non évaluée par un joueur.** Indices
+d'instinct à l'écran, présentés par `ThreatCues`, qui remplace le texte
+« vibrations » :
+- pas proches, avec une direction approximative relative au regard ;
+- fouille proche ;
+- annonce de capture : bandeau avec une barre, et disque de progression
+  dans la zone ;
+- esquive et annulation.
+
+Réglages : intensité, mouvement réduit et indices renforcés sans son.
+Nouvelle scène héritée `kitchen_instinct.tscn` : une lampe et sa zone
+d'exposition, commandées par un seul contrôleur. Exposé et vu, le cafard
+est confirmé ×1,5 plus vite (provisoire). Les autres scènes gardent leur
+comportement. Voir `docs/INSTINCT.md`. L'écoute audio de la tâche I
+reste à faire.
+
 Il reste des contrôles sur machine réelle (voir plus bas).
 
 ## Éléments du projet
@@ -105,7 +121,12 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | `scenes/levels/kitchen_threat.tscn` + `scripts/levels/kitchen_threat.gd` | Tentative avec humain ; résultat terminal ; recommencer |
 | `scenes/threat/human.tscn` + `scripts/threat/human_brain.gd`, `human_perception.gd` | Humain : états, déplacement, capture, perception |
 | `scripts/threat/human_tuning.gd` + `data/tuning/human_tuning.tres` | Réglages centralisés de l'humain |
-| `scripts/threat/threat_cues.gd` | Signal joueur : vibrations des pas proches |
+| `scripts/threat/threat_cues.gd` | Instinct (J) : indices de pas, fouille, annonce, badge d'exposition |
+| `scripts/instinct/*.gd` | Réglages d'instinct et leur panneau, `ExposureLight`, `ExposureZone`, diagnostic de la lumière |
+| `scenes/levels/kitchen_instinct.tscn` | Composition héritée de `kitchen_threat` + lumière et exposition |
+| `scenes/tests/instinct_runner.tscn` + `.gd` | Contrôles d'instinct et de lumière (37), vues de la lumière, séquence |
+| `docs/INSTINCT.md` | Indices, portées, durées, réglages, modèle d'exposition, limites |
+| `docs/validation/instinct/` | Vues de la lumière, planches des séquences avec et sans son |
 | `scripts/threat/threat_debug.gd` | Diagnostic d'IA (F3) |
 | `scripts/threat/human_camera_guard.gd` | Caméra hors des pieds et jambes de l'humain |
 | `scenes/tests/threat_runner.tscn` + `.gd` | Scénarios de l'humain (36) et séquence rendue |
@@ -140,6 +161,18 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche J — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Instinct, lumière, confirmation, cycle de vie | `instinct_runner` (kitchen_instinct + kitchen_threat) | **37/37** |
+| Validité du test | 7 défauts injectés (suivi continu, lumière sans occultation, lumière qui fait voir, lampe sans zone, direction fixe, remise à zéro du doute, bandeau non effacé) | Tous détectés (la 6e mutation corrigée pour être pertinente) |
+| Lumière rendue et zone | vues de dessus et du cafard | coïncident ; sous l'assise : ombre, pas d'exposition |
+| Séquences | avec son, et sans son + indices renforcés | 17 indices identiques ; `validation/instinct/` |
+| Non-régression | B 57, C 54, D 47, E 52, G 66, F 36, essais 7, audio 27 ; scène principale | OK ; **identique au pixel près** |
+| Joueur réel | — | **Non évalué** (compréhension, surcharge, exposition, première capture) |
+| Écoute audio (I) | — | **Toujours non faite** |
 
 ## Vérifications tâche I — 2026-09-28
 
@@ -306,6 +339,19 @@ tous OK.
 
 ## Vérifications restantes
 
+- Tâche J, avec écran, clavier et souris :
+  - compréhension spontanée des arcs « pas » et du « ? fouille » ;
+  - surcharge visuelle ;
+  - perception de l'exposition (badge et flaque de lumière) ;
+  - lisibilité du bandeau en 0,7 s, et possibilité de comprendre et
+    d'esquiver la **première** capture ;
+  - confort du mouvement réduit ;
+  - jeu sans son avec les indices renforcés.
+
+  Aucun temps de réaction n'est jugé confortable sur la base des tests
+  automatiques.
+- **Écoute audio (tâche I) : toujours non réalisée.**
+
 - Tâche I, au casque puis sur haut-parleurs : timbre et crédibilité des
   sons ; confort (pas répétés, ronronnement) ; localisation gauche/droite
   perçue (devant/derrière non distingués) ; lisibilité de l'annonce, et
@@ -363,5 +409,6 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche suivante selon la feuille de route : **J** (indices visuels), non
-commencée. La suspicion globale n'est pas commencée non plus.
+Tâche J faite techniquement. La suspicion globale et la sauvegarde ne
+sont pas commencées. Prochaine étape selon la feuille de route, après
+les évaluations manuelles de F, I et J.

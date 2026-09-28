@@ -211,9 +211,16 @@ vers l'est, il tourne le dos au refuge.
   au point de recherche, puis à chaque retournement du balayage (3 fois
   pour une recherche complète). C'est un événement de présentation : il
   ne change aucune règle.
-- **ThreatCues :** un pas à moins de **0,8 m** du cafard fait apparaître
-  brièvement « 〰 vibrations 〰 ». La force diminue avec la distance. Pas
-  de direction, pas de position, pas de silhouette à travers les murs.
+- **ThreatCues** (instinct, tâche J) : un pas à moins de **0,8 m** du
+  cafard donne une impulsion « ))) 〰 pas » dans une direction
+  approximative (secteur de 45°, relatif au regard). La force diminue avec
+  la distance. Les inspections proches donnent « ? fouille », et l'annonce
+  un bandeau avec une barre. Il n'y a ni position exacte, ni suivi entre
+  deux événements, ni silhouette à travers les murs. Voir
+  `docs/INSTINCT.md`.
+- **Lumière** (tâche J, `kitchen_instinct.tscn` seulement) : exposé à la
+  lumière et vu, le cafard est confirmé 1,5 fois plus vite
+  (`lit_confirm_multiplier`, provisoire). La vue elle-même est inchangée.
 - **Zone rouge au sol** pendant l'annonce de capture (conservée : le son
   n'est pas le seul indice).
 - **Audio** (tâche I) : pas, froissement de fouille, annonce, résolution,
@@ -243,7 +250,8 @@ masquée tant que la caméra s'y trouve.
 | | confirmation / oubli / perte | 0,8 s / 1,5 s / 0,4 s |
 | Recherche | sur place / maximum / balayage | 4 s / 10 s / ±45° |
 | Capture | portée / rayon / annonce / anticipation / délai | 0,40 m / 3,5 cm / 0,7 s / 60 % / 1,0 s |
-| Signal joueur | portée des vibrations | 0,8 m |
+| Signal joueur | portée des indices de pas | 0,8 m |
+| Lumière (J) | multiplicateur de confirmation exposé | ×1,5 (provisoire) |
 
 ## Limites
 
@@ -270,7 +278,7 @@ anneau cyan = cafard, tige magenta = dernière position connue) et
   entre eux). La caméra est protégée, mais l'image peut surprendre.
 - Déplacements en lignes droites entre zones. Pas de contournement général
   d'obstacles : la route et les zones sont réglées pour ce niveau.
-- Les vibrations restent un texte provisoire, en attendant les indices
-  visuels (J). L'audio (I) double les pas, sans les remplacer.
+- Les indices visuels (J) et l'audio (I) présentent les mêmes événements.
+  Aucun des deux n'a encore été évalué par un joueur.
 - Rendu logiciel uniquement ; la scène tourne à environ la moitié du temps
   réel en headless. Aucune mesure de performance.

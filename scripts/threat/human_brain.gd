@@ -43,6 +43,9 @@ const FOOT_REST_Z := 0.03
 @export var junction := Vector3(1.47, 0.0, 0.745)
 ## Tests only: no translation or rotation, everything else runs.
 @export var pinned := false
+## Optional (kitchen_instinct): the player's exposure to a light. Absent,
+## the confirmation speed is the historical one.
+@export var exposure: ExposureZone
 
 var state := State.ROUTINE
 ## 0..1: sight accumulated toward a confirmation.
@@ -141,9 +144,18 @@ func _physics_process(delta: float) -> void:
 
 func _accumulate(seen: bool, delta: float) -> void:
 	if seen:
-		confirmation = minf(confirmation + delta / tuning.confirm_time, 1.0)
+		confirmation = minf(confirmation + delta / tuning.confirm_time * confirm_rate_multiplier(), 1.0)
 	else:
 		confirmation = maxf(confirmation - delta / tuning.forget_time, 0.0)
+
+
+## Applies only to sight gains: the light never makes the player seen,
+## and switching it keeps the confirmation already accumulated (only the
+## speed changes, from the next tick).
+func confirm_rate_multiplier() -> float:
+	if exposure and exposure.is_player_exposed():
+		return tuning.lit_confirm_multiplier
+	return 1.0
 
 
 func _patrol(delta: float) -> void:

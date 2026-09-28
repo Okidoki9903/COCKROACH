@@ -218,7 +218,7 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_threat.tscn` (F6).
 | Se cacher sous les meubles | l'humain cherche où il t'a vu, puis reprend sa routine | ✅ automatisé · ✅ séquence |
 | Rester immobile à découvert près de lui | zone rouge 0,7 s, puis « Attrapé ! » | ✅ automatisé · ⏳ temps de réaction réel |
 | Pendant la zone rouge, s'écarter ou se glisser sous la chaise | capture ratée | ✅ automatisé |
-| Pas proches | « 〰 vibrations 〰 », sans direction | ✅ automatisé · ⏳ utilité réelle |
+| Pas proches | depuis J : arcs « 〰 pas » dans une direction approximative (voir étape J) | ✅ automatisé · ⏳ utilité réelle |
 | Échap pendant l'annonce ou la recherche | tout est figé | ✅ automatisé |
 | Recommencer après capture | humain et session neufs | ✅ automatisé · ⏳ bouton cliqué |
 | Sortie complète (boire, prendre, déposer) en évitant l'humain | « Sortie réussie : tentative terminée » | ✅ automatisé (commandes seules) · ⏳ joueur réel |
@@ -259,6 +259,41 @@ Manuel, **au casque**, sur machine réelle : lancer `kitchen_threat.tscn`.
 | Recommencer plusieurs fois | aucun son doublé | ✅ automatisé |
 | Timbre, confort, niveaux relatifs | agréables, rien de criard | ⏳ **non évalué** |
 
+## Étape J — instinct et lumière
+
+```sh
+timeout 600 $G --headless --fixed-fps 60 --path . res://scenes/tests/instinct_runner.tscn   # attendu : code 0, 37/37
+# Vues de la lumière (rendu) :
+VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json xvfb-run -a -s "-screen 0 1280x720x24" \
+  $G --path . res://scenes/tests/instinct_runner.tscn -- --shots=/tmp/j
+# Séquence (movie writer ; ajouter --silent pour la version sans son, indices renforcés) :
+... $G --fixed-fps 30 --write-movie /tmp/j/instinct.avi --path . res://scenes/tests/instinct_runner.tscn -- --clip=/tmp/j
+```
+
+Sous Xvfb sans `--write-movie`, Godot affiche `ERR_CANT_OPEN` après
+des messages ALSA : le conteneur n'a pas de périphérique son. C'est
+sans effet sur le rendu.
+
+Manuel, sur machine réelle : `kitchen_instinct.tscn`, puis
+`kitchen_threat.tscn`.
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Pas proche, puis tourner la caméra | l'arc apparaît du côté du pas, reste figé, puis disparaît en 0,6 s | ✅ automatisé · ⏳ compréhension |
+| Humain immobile ou lointain | aucun indice | ✅ automatisé |
+| Caché pendant une recherche proche | « ? fouille » à chaque inspection, sans pas | ✅ automatisé · ✅ séquence · ⏳ compréhension |
+| Annonce de capture | bandeau « ⚠ ATTAQUE — BOUGE ! » avec barre, disque qui se remplit ; zone hors champ signalée | ✅ automatisé · ✅ séquence · ⏳ lisibilité en 0,7 s |
+| Esquive, sortie pendant l'annonce | « ✓ ESQUIVÉ », « — ATTAQUE ANNULÉE » | ✅ automatisé |
+| Son coupé + indices renforcés | tout reste lisible | ✅ automatisé · ✅ séquence sans son · ⏳ joueur |
+| Mouvement réduit | indices fixes et temporaires ; annonce complète | ✅ automatisé · ⏳ confort |
+| Intensité 25 % | plus discret, toujours visible | ✅ automatisé · ⏳ jugement |
+| Lumière allumée / éteinte (F3, bouton) | flaque de lumière et badge « ☀ Exposé à la lumière » ensemble | ✅ automatisé · ✅ vues rendues · ⏳ perception |
+| Sous l'assise, dans la flaque | ombre, pas de badge | ✅ automatisé · ✅ vue rendue |
+| Exposé et vu | confirmé en 0,53 s au lieu de 0,8 s ; pas de « repéré » affiché | ✅ automatisé · ⏳ difficulté |
+| `kitchen_threat.tscn` | aucune lumière, confirmation en 0,8 s | ✅ automatisé |
+| Recommencer plusieurs fois | aucun indice ni lumière en double | ✅ automatisé |
+| Première capture | comprise et esquivable | ⏳ **non évalué** |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -271,6 +306,7 @@ Manuel, **au casque**, sur machine réelle : lancer `kitchen_threat.tscn`.
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche E : 52/52 ; deux repères de lisibilité ajoutés ; B 57/57, C 54/54, D 47/47 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche G : 66/66 ; miette portée déplacée sur la tête, collision du biscuit ajoutée ; B–E inchangés et verts ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche F : 36/36 ; départ au fond du refuge, jonction de l'humain et caméra dans les pieds corrigées ; B–G verts ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe, movie writer | 4.7.2-stable | Tâche J : instinct 37/37 ; lampe trop forte (sol saturé) → énergie 2,5 ; indices agrandis et bandeau remonté après inspection des images ; B–I verts ; référence identique ; aucun joueur, aucune écoute |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe, pilote audio factice + movie writer | 4.7.2-stable | Tâche I : audio 27/27, essais de capture 7/7 ; signal mesuré, **aucune écoute** ; ambiance baissée, annonce raccourcie en attaque, fouille remontée après mesure ; B–G et F verts ; référence identique |
 
 ## Script d'installation pour un environnement distant

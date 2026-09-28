@@ -41,6 +41,9 @@
 | D37 | Écouteur sur le cafard (12 mm), tourné avec le lacet du regard, indépendant de la distance et de l'inclinaison de la caméra | La caméra rapprochée ne doit pas changer la proximité perçue | Actée (tâche I) |
 | D38 | Sons provisoires synthétisés par `tools/gen_audio.py` (Python standard, graines fixes) | Aucun téléchargement ni licence tierce ; reproductibles | Provisoire ; à remplacer par des sons produits |
 | D39 | Bus Master (limiteur −1 dB), Threat, Ambience ; occultation bornée à −6 dB + passe-bas 2,5 kHz | Marge garantie ; la couverture assourdit sans rendre muet | Provisoire ; niveaux à juger à l'écoute |
+| D40 | Instinct visuel dans `ThreatCues` (même composant que les vibrations de F) : un indice par événement réel, direction par secteurs de 45° relatifs au regard, figée à l'événement | Pas de doublon ; ne révèle ni position exacte ni état de l'IA | Actée (tâche J) |
+| D41 | Lumière = `ExposureLight` (lampe + zone logique, un seul interrupteur) dans une scène héritée `kitchen_instinct.tscn` | Rendu et logique ne peuvent diverger ; `kitchen_threat` et les références inchangées | Actée (tâche J) |
+| D42 | Exposition à 2 niveaux ; exposé et vu → confirmation ×1,5, doute engagé conservé à la bascule | La lumière accélère, ne fait jamais voir ; approximation de jeu | Provisoire ; multiplicateur à régler en jeu |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

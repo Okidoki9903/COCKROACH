@@ -33,6 +33,16 @@ souris ou au clavier (Tab puis flèches). 0 % coupe le bus. Les réglages
 durent la session (ils survivent à « Recommencer »), sans sauvegarde. F3
 liste aussi les derniers sons émis. Voir `docs/AUDIO.md`.
 
+Depuis la tâche J : aucune nouvelle touche. En pause, le panneau
+« Indices d'instinct » (à gauche des volumes) offre :
+- l'intensité, de 25 à 100 % ;
+- le mouvement réduit ;
+- les indices renforcés (sans son).
+
+Dans `kitchen_instinct.tscn`, la lumière ne se bascule que depuis le
+diagnostic : F3, puis le bouton « Basculer la lumière (diagnostic) ».
+Voir `docs/INSTINCT.md`.
+
 Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 `drop` est lié au Q *physique*. Le test automatique vérifie ces deux points.

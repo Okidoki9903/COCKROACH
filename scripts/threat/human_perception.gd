@@ -3,8 +3,9 @@ extends Node
 ## What the human actually sees of the player this tick. Rays go from the
 ## eyes to a few points on the cockroach's real body (centre, head, tail)
 ## and are occluded by the level's collision (layer 1). Range and view cone
-## are horizontal, from the body centre and facing. No light, no suspicion:
-## the sensitivity is constant (see HumanTuning).
+## are horizontal, from the body centre and facing. No suspicion. Light
+## never changes what is seen; it only speeds up the confirmation of what
+## is seen (HumanBrain, optional ExposureZone).
 
 @export_flags_3d_physics var occlusion_mask := 1
 
@@ -59,11 +60,16 @@ func _facing() -> Vector3:
 	return f.normalized()
 
 
-## Points on the cockroach's body: centre, and 13 mm forward and back
-## along its visual (the 3 cm body), a few mm above the floor.
 func _samples() -> Array[Vector3]:
-	var base := _player.global_position
-	var along := -_player.visual.global_basis.z
+	return body_samples(_player)
+
+
+## Points on the cockroach's body: centre, and 13 mm forward and back
+## along its visual (the 3 cm body), a few mm above the floor. Shared with
+## the exposure zone (task J), so light and sight test the same body.
+static func body_samples(player: PlayerMotor) -> Array[Vector3]:
+	var base := player.global_position
+	var along := -player.visual.global_basis.z
 	along.y = 0.0
 	along = along.normalized() * 0.013
 	var up := Vector3.UP * 0.004

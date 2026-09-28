@@ -18,6 +18,9 @@ extends Resource
 @export var confirm_time := 0.8        ## continuous sight to confirm
 @export var forget_time := 1.5         ## time for a full doubt to fade
 @export var lose_time := 0.4           ## unseen time before searching
+## PROVISIONAL (task J): confirmation speed while the player is seen AND
+## exposed to an active light (ExposureZone). 1.0 = light has no effect.
+@export var lit_confirm_multiplier := 1.5
 
 @export_group("Search")
 @export var search_duration := 4.0     ## looking around once at the spot

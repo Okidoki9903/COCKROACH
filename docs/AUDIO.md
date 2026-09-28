@@ -3,7 +3,7 @@
 Première couche audio : faire comprendre, **depuis la caméra du cafard**,
 l'approche, la recherche et la tentative de capture de l'humain. Il n'y a
 ni musique, ni voix, ni suspicion, ni nouvelle menace. Les indices visuels
-existants sont conservés (zone rouge, « vibrations », message de fin) : le
+existants sont conservés (zone rouge, indice de pas, message de fin) : le
 son n'est jamais le seul moyen de percevoir une capture.
 
 > **Écoute humaine : non faite.** Toutes les vérifications ci-dessous
