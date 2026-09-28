@@ -22,6 +22,10 @@ ou dépose selon la cible ; la touche **lâcher** (Q physique, A en AZERTY)
 pose la miette ; le sprint est refusé tant qu'une miette est portée. Voir
 `docs/RESOURCE_LOOP.md`.
 
+Depuis la tâche F, dans `kitchen_threat.tscn` : aucune nouvelle commande.
+F3 affiche aussi le diagnostic de l'humain ; « Recommencer » (bouton) après
+une capture ou une réussite.
+
 Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 `drop` est lié au Q *physique*. Le test automatique vérifie ces deux points.

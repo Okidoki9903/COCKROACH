@@ -200,6 +200,29 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_loop.tscn` (F6).
 | Échap puis « Réinitialiser la session » | tout revient à l'état initial | ✅ automatisé · ⏳ bouton cliqué à la souris |
 | Portée de 2 cm | confortable | ⏳ jugement manuel |
 
+## Étape F — humain
+
+Automatique (≈ 10 min, la scène tourne à environ la moitié du temps réel en headless) :
+
+```sh
+$G --headless --fixed-fps 60 --path . res://scenes/tests/threat_runner.tscn   # attendu : code 0, 36/36
+```
+
+Manuel, sur machine réelle : lancer `scenes/levels/kitchen_threat.tscn` (F6).
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Rester au fond du refuge un cycle | jamais repéré | ✅ automatisé |
+| Sortir à découvert devant l'humain | doute, puis confirmation après ≈ 0,8 s | ✅ automatisé · ⏳ lisibilité réelle |
+| Se cacher sous les meubles | l'humain cherche où il t'a vu, puis reprend sa routine | ✅ automatisé · ✅ séquence |
+| Rester immobile à découvert près de lui | zone rouge 0,7 s, puis « Attrapé ! » | ✅ automatisé · ⏳ temps de réaction réel |
+| Pendant la zone rouge, s'écarter ou se glisser sous la chaise | capture ratée | ✅ automatisé |
+| Pas proches | « 〰 vibrations 〰 », sans direction | ✅ automatisé · ⏳ utilité réelle |
+| Échap pendant l'annonce ou la recherche | tout est figé | ✅ automatisé |
+| Recommencer après capture | humain et session neufs | ✅ automatisé · ⏳ bouton cliqué |
+| Sortie complète (boire, prendre, déposer) en évitant l'humain | « Sortie réussie : tentative terminée » | ✅ automatisé (commandes seules) · ⏳ joueur réel |
+| F3 | diagnostic de l'IA affiché ou masqué | ✅ automatisé |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -211,6 +234,7 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_loop.tscn` (F6).
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche D : 47/47 ; marge 1 mm → 0,2 mm, latence d'entrée et respiration caméra corrigées ; B 57/57, C 54/54 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche E : 52/52 ; deux repères de lisibilité ajoutés ; B 57/57, C 54/54, D 47/47 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche G : 66/66 ; miette portée déplacée sur la tête, collision du biscuit ajoutée ; B–E inchangés et verts ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche F : 36/36 ; départ au fond du refuge, jonction de l'humain et caméra dans les pieds corrigées ; B–G verts ; référence identique |
 
 ## Script d'installation pour un environnement distant
 

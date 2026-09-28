@@ -32,6 +32,11 @@
 | D28 | Portée d'interaction de 2 cm depuis l'enveloppe du corps, avec vue dégagée | Interaction liée au corps, pas à la caméra ; pas à travers les murs | Provisoire ; confort à juger |
 | D29 | Transport = marche forcée via `PlayerMotor.sprint_blocked` | Changement minimal du moteur ; `PlayerInput` intact | Actée (tâche G) |
 | D30 | Miette portée sur la tête, pas devant | Devant, elle entrait de 10,5 mm dans les murs | Actée (tâche G) |
+| D31 | Humain à proportions réelles, confiné à des zones rectangulaires de l'allée, points de passage et lignes droites | Pas de navigation complexe ; meubles bas, refuge et chaise hors de portée | Actée (tâche F) |
+| D32 | Perception par 3 rayons sur le corps réel, cône de ±60°, portée de 1,6 m, confirmation en 0,8 s | Occultation par le décor ; aucune connaissance hors vue | Provisoire ; à régler en jeu |
+| D33 | Capture annoncée 0,7 s, point figé avec 60 % d'anticipation, zone de 3,5 cm, bloquée par tout obstacle au-dessus | Évitable en changeant de mouvement ou en se couvrant | Provisoire ; lisibilité à valider |
+| D34 | Tentative de démonstration : un seul résultat terminal, recommencer reconstruit tout | Pas de sauvegarde ni de mort persistante | Actée (tâche F) |
+| D35 | Garde de caméra sur les pièces visibles de l'humain, plutôt que des corps physiques sur les pieds | Les corps attachés aux pieds suivaient mal le visuel | Actée (tâche F) |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

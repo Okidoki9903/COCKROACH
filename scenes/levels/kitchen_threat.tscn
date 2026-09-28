@@ -1,0 +1,83 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/kitchen_threat.gd" id="1_threat"]
+[ext_resource type="PackedScene" path="res://scenes/levels/kitchen_loop.tscn" id="2_loop"]
+[ext_resource type="PackedScene" path="res://scenes/threat/human.tscn" id="3_human"]
+[ext_resource type="Script" path="res://scripts/threat/threat_cues.gd" id="4_cues"]
+[ext_resource type="Script" path="res://scripts/threat/threat_debug.gd" id="5_debug"]
+[ext_resource type="Script" path="res://scripts/threat/human_camera_guard.gd" id="6_guard"]
+
+[node name="KitchenThreat" type="Node3D"]
+script = ExtResource("1_threat")
+
+[node name="Loop" parent="." instance=ExtResource("2_loop")]
+
+[node name="HumanRoute" type="Node3D" parent="."]
+
+[node name="W1_Plan" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 0, 0.72)
+metadata/pause = 2.0
+
+[node name="W2_Evier" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, 0.72)
+metadata/pause = 2.5
+
+[node name="W3_Ouest" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0, 0.72)
+metadata/pause = 1.5
+
+[node name="W4_Evier" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, 0.72)
+metadata/pause = 1.0
+
+[node name="W5_Plan" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 0, 0.72)
+metadata/pause = 0.5
+
+[node name="W6_Frigo" type="Marker3D" parent="HumanRoute"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 0, 0.9)
+metadata/pause = 2.5
+
+[node name="Human" parent="." node_paths=PackedStringArray("player", "route_root") instance=ExtResource("3_human")]
+player = NodePath("../Loop/Kitchen/Player")
+route_root = NodePath("../HumanRoute")
+walk_areas = Array[Rect2]([Rect2(0.15, 0.71, 1.3, 0.03), Rect2(1.4, 0.71, 0.1, 0.08), Rect2(1.45, 0.77, 0.43, 0.36)])
+
+[node name="HumanCameraGuard" type="Node" parent="." node_paths=PackedStringArray("rig", "human")]
+script = ExtResource("6_guard")
+rig = NodePath("../Loop/Kitchen/CameraRig")
+human = NodePath("../Human")
+
+[node name="ThreatCues" type="CanvasLayer" parent="." node_paths=PackedStringArray("human", "player")]
+script = ExtResource("4_cues")
+human = NodePath("../Human")
+player = NodePath("../Loop/Kitchen/Player")
+
+[node name="ThreatDebug" type="CanvasLayer" parent="." node_paths=PackedStringArray("human", "level_panel")]
+script = ExtResource("5_debug")
+human = NodePath("../Human")
+level_panel = NodePath("../Loop/Kitchen/DebugLayer/LevelDebugPanel")
+
+[node name="Outcome" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 10
+
+[node name="Box" type="VBoxContainer" parent="Outcome"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -60.0
+offset_right = 200.0
+offset_bottom = 60.0
+
+[node name="Message" type="Label" parent="Outcome/Box"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+
+[node name="Restart" type="Button" parent="Outcome/Box"]
+text = "Recommencer"

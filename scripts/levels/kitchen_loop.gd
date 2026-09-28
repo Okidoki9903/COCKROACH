@@ -5,9 +5,18 @@ extends Node3D
 ## (new crumb, empty objectives, player in the refuge). Nothing persists.
 
 signal session_reset(fresh: KitchenLoop)
+## Emitted instead of resetting when an enclosing scene owns the reset.
+signal reset_requested
+
+## Set by an enclosing scene (e.g. kitchen_threat) that must rebuild more
+## than this loop; reset_session() then only asks it to.
+var external_reset := false
 
 
 func reset_session() -> void:
+	if external_reset:
+		reset_requested.emit()
+		return
 	get_tree().paused = false
 	if get_tree().current_scene == self:
 		get_tree().reload_current_scene()

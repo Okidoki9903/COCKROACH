@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche G (boucle de ressources) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche F (humain et détection) terminée._
 
 ## Version du moteur (fixée)
 
@@ -44,7 +44,13 @@ repères inertes de nourriture et d'eau. Voir `docs/LEVEL_BLOCKOUT.md`.
 lâcher, reprendre, boire, déposer ; la réussite demande l'eau et le dépôt.
 Réinitialisation depuis la pause. Voir `docs/RESOURCE_LOOP.md`.
 
-Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche F.
+**Étape F : terminée techniquement.** Humain à routine, perception par rayons,
+doute, confirmation, recherche à la dernière position vue, capture annoncée
+et évitable, dans `scenes/levels/kitchen_threat.tscn` (composition autour de
+`kitchen_loop`). Un seul résultat terminal ; recommencer reconstruit tout.
+Voir `docs/HUMAN_AI.md`. Lisibilité et plaisir : non évalués.
+
+Il reste des contrôles sur machine réelle (voir plus bas).
 
 ## Éléments du projet
 
@@ -82,6 +88,15 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | `scripts/ui/loop_hud.gd` | Interface minimale de la boucle |
 | `scenes/tests/resource_loop_runner.tscn` + `.gd`, `scripts/tests/fake_interactable.gd` | Scénarios de la boucle (66) et séquence rendue |
 | `docs/RESOURCE_LOOP.md` | Boucle : commandes, états, réglages, vérifications, limites |
+| `scenes/levels/kitchen_threat.tscn` + `scripts/levels/kitchen_threat.gd` | Tentative avec humain ; résultat terminal ; recommencer |
+| `scenes/threat/human.tscn` + `scripts/threat/human_brain.gd`, `human_perception.gd` | Humain : états, déplacement, capture, perception |
+| `scripts/threat/human_tuning.gd` + `data/tuning/human_tuning.tres` | Réglages centralisés de l'humain |
+| `scripts/threat/threat_cues.gd` | Signal joueur : vibrations des pas proches |
+| `scripts/threat/threat_debug.gd` | Diagnostic d'IA (F3) |
+| `scripts/threat/human_camera_guard.gd` | Caméra hors des pieds et jambes de l'humain |
+| `scenes/tests/threat_runner.tscn` + `.gd` | Scénarios de l'humain (36) et séquence rendue |
+| `docs/HUMAN_AI.md` | Route, états, paramètres, fenêtres de fuite, limites |
+| `docs/validation/threat/*.jpg` | Séquence repérage → recherche → routine |
 | `docs/validation/kitchen/*.jpg` | Plan annoté, vues à hauteur de cafard, séquence |
 | `docs/validation/movement/sequences_4.7.2.jpg` | Captures de référence |
 | `docs/validation/camera/*.jpg` | Captures de référence caméra |
@@ -102,6 +117,23 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche F — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Scénarios de l'humain | `threat_runner` (perception et collisions réelles) | **36/36** |
+| Sortie complète par les commandes | boire → prendre → éviter → déposer, sans téléportation ni invulnérabilité | Réussie. L'humain a repéré le cafard (doute 74 ticks, confirmé 33), l'a perdu et l'a cherché, sans capture ; distance minimale 0,28 m |
+| Validité du test | 5 défauts injectés (sans occultation, position connue mise à jour sans vue, capture à travers obstacle, capture qui suit, recherche sans fin) | Tous détectés |
+| Rendu | Séquence repérage → fuite → annonce → recherche → routine (vue diagnostic et vue du cafard) | Caméra dans les chaussures (188 ticks) → corrigé : 0 |
+| Non-régression | B 57, C 54, D 47, E 52, G 66 ; scène principale | OK ; **identique au pixel près** |
+
+Défauts trouvés et corrigés pendant la tâche :
+- départ du joueur visible par l'entrée du refuge → départ au fond ;
+- oscillation de l'humain au point de jonction (seuil d'arrivée), puis
+  arrêt à 2 cm de la jonction ;
+- caméra dans les pieds de l'humain → garde de caméra, pieds reculés de
+  3 cm.
 
 ## Vérifications tâche G — 2026-09-28
 
@@ -236,7 +268,13 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour F)
+## Vérifications restantes
+
+- Tâche F, avec clavier, souris et écran : compréhension de l'approche
+  (pieds, vibrations), du repérage et de la zone de capture ; temps de
+  réaction réel face à 0,7 s d'annonce ; compréhension de la règle
+  « changer de mouvement pour esquiver » ; surprise des pieds qui passent
+  sur le cafard ; intérêt et difficulté de la sortie.
 
 - Tâche G, avec clavier, souris et écran : confort de la portée de 2 cm,
   lisibilité de l'action proposée, des objectifs et du lâcher refusé,
@@ -283,4 +321,5 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche **F — NPC / AI : humain**. **Non commencée.**
+Tâche suivante selon la feuille de route : **I — Audio** (les événements de
+pas existent déjà). Suspicion globale et tâche J : non commencées.

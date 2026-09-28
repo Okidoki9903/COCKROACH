@@ -1,0 +1,113 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/threat/human_brain.gd" id="1_brain"]
+[ext_resource type="Script" path="res://scripts/threat/human_perception.gd" id="2_perception"]
+[ext_resource type="Resource" path="res://data/tuning/human_tuning.tres" id="3_tuning"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_legs"]
+radius = 0.1
+height = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_shoe"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_shoe"]
+material = SubResource("Mat_shoe")
+size = Vector3(0.1, 0.07, 0.27)
+
+[sub_resource type="StandardMaterial3D" id="Mat_toe"]
+albedo_color = Color(0.85, 0.85, 0.82, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_toe"]
+material = SubResource("Mat_toe")
+size = Vector3(0.102, 0.03, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cloth"]
+albedo_color = Color(0.25, 0.3, 0.45, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_leg"]
+material = SubResource("Mat_cloth")
+size = Vector3(0.12, 0.82, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_torso"]
+material = SubResource("Mat_cloth")
+size = Vector3(0.42, 0.6, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="Mat_skin"]
+albedo_color = Color(0.82, 0.66, 0.55, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_head"]
+material = SubResource("Mat_skin")
+size = Vector3(0.2, 0.24, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="Mat_zone"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.95, 0.2, 0.15, 0.6)
+
+[sub_resource type="CylinderMesh" id="Mesh_zone"]
+material = SubResource("Mat_zone")
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.0008
+
+[node name="Human" type="CharacterBody3D"]
+collision_layer = 8
+motion_mode = 1
+script = ExtResource("1_brain")
+tuning = ExtResource("3_tuning")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("Shape_legs")
+
+[node name="Perception" type="Node" parent="."]
+script = ExtResource("2_perception")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="FootL" type="Node3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0, 0.03)
+
+[node name="Shoe" type="MeshInstance3D" parent="Visual/FootL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.035, -0.03)
+mesh = SubResource("Mesh_shoe")
+
+[node name="Toe" type="MeshInstance3D" parent="Visual/FootL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.016, -0.145)
+mesh = SubResource("Mesh_toe")
+
+[node name="FootR" type="Node3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0, 0.03)
+
+[node name="Shoe" type="MeshInstance3D" parent="Visual/FootR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.035, -0.03)
+mesh = SubResource("Mesh_shoe")
+
+[node name="Toe" type="MeshInstance3D" parent="Visual/FootR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.016, -0.145)
+mesh = SubResource("Mesh_toe")
+
+[node name="LegL" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, 0.48, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="LegR" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, 0.48, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="Torso" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("Mesh_torso")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.64, 0)
+mesh = SubResource("Mesh_head")
+
+[node name="Nose" type="MeshInstance3D" parent="Visual/Head"]
+transform = Transform3D(0.25, 0, 0, 0, 0.2, 0, 0, 0, 0.3, 0, 0, -0.13)
+mesh = SubResource("Mesh_head")
+
+[node name="CaptureZone" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_zone")
+cast_shadow = 0
