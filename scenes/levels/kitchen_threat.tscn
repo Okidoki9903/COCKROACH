@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/levels/kitchen_threat.gd" id="1_threat"]
 [ext_resource type="PackedScene" path="res://scenes/levels/kitchen_loop.tscn" id="2_loop"]
@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://scripts/threat/threat_cues.gd" id="4_cues"]
 [ext_resource type="Script" path="res://scripts/threat/threat_debug.gd" id="5_debug"]
 [ext_resource type="Script" path="res://scripts/threat/human_camera_guard.gd" id="6_guard"]
+[ext_resource type="Script" path="res://scripts/audio/threat_audio.gd" id="7_audio"]
+[ext_resource type="Script" path="res://scripts/audio/audio_settings.gd" id="8_settings"]
 
 [node name="KitchenThreat" type="Node3D"]
 script = ExtResource("1_threat")
@@ -53,10 +55,21 @@ script = ExtResource("4_cues")
 human = NodePath("../Human")
 player = NodePath("../Loop/Kitchen/Player")
 
-[node name="ThreatDebug" type="CanvasLayer" parent="." node_paths=PackedStringArray("human", "level_panel")]
+[node name="ThreatAudio" type="Node" parent="." node_paths=PackedStringArray("human", "player", "rig", "threat")]
+script = ExtResource("7_audio")
+human = NodePath("../Human")
+player = NodePath("../Loop/Kitchen/Player")
+rig = NodePath("../Loop/Kitchen/CameraRig")
+threat = NodePath("..")
+
+[node name="AudioSettings" type="CanvasLayer" parent="."]
+script = ExtResource("8_settings")
+
+[node name="ThreatDebug" type="CanvasLayer" parent="." node_paths=PackedStringArray("human", "level_panel", "audio")]
 script = ExtResource("5_debug")
 human = NodePath("../Human")
 level_panel = NodePath("../Loop/Kitchen/DebugLayer/LevelDebugPanel")
+audio = NodePath("../ThreatAudio")
 
 [node name="Outcome" type="CanvasLayer" parent="."]
 process_mode = 3

@@ -41,6 +41,7 @@ n'est pas modifiée hormis la délégation du reset. S'y ajoutent :
 | `ThreatCues` | `scripts/threat/threat_cues.gd` | Signal **joueur** : vibration des pas proches |
 | `ThreatDebug` | `scripts/threat/threat_debug.gd` | **Diagnostic** (F3) : état, visibilité, confirmation, dernière position, recherche, zone |
 | `Outcome` | (dans la scène) | Message de fin et bouton « Recommencer » |
+| `ThreatAudio`, `AudioSettings` | `scripts/audio/*.gd` | Tâche I : sons de l'humain entendus depuis le cafard, volumes en pause (`docs/AUDIO.md`) |
 
 ## L'humain
 
@@ -140,19 +141,58 @@ SEARCH ──confirmation = 100 %──▶ CONFIRMED
   dessous des meubles, de la chaise et le refuge protègent donc.
 - Échec : délai de 1 s, puis CONFIRMED si le cafard est vu, sinon SEARCH.
 
-### Fenêtres de fuite (0,7 s d'annonce)
+### Fenêtres de fuite (0,7 s d'annonce) — essais mesurés (tâche I)
 
-| Situation au début de l'annonce | Réaction | Résultat |
-|---|---|---|
-| Cafard immobile | Partir dans n'importe quelle direction : 5,2 cm en 0,7 s à la marche | S'échappe (> 3,5 cm) si la réaction vient dans les 0,3 s environ |
-| Cafard qui marche tout droit | Continuer tout droit | **Pris** : la visée anticipe 60 % du trajet |
-| Cafard qui marche | S'arrêter, ou tourner de 90° | S'échappe (≥ 3,4 cm du point visé) |
-| Cafard qui sprinte (sans charge) tout droit | Continuer | S'échappe : 11 cm parcourus, visée à 6,7 cm |
-| Cafard au bord d'une couverture | Y entrer (1,5 cm suffit sous l'assise de la chaise) | Capture bloquée |
+Le tableau de la tâche F mélangeait des cas mesurés et des cas calculés
+sur papier. Deux de ces calculs étaient faux (« réagir dans les 0,3 s » et
+« s'arrêter »). Les essais ci-dessous sont reproduits par
+`scenes/tests/capture_trials_runner.tscn` (7/7). Chaque essai utilise la
+routine, la vue et l'approche réelles, les commandes du joueur et la
+résolution réelle. **Aucune règle n'a été modifiée.**
 
-En portant une miette, le cafard marche : la bonne réaction est de
-**changer de mouvement**. Continuer tout droit à la marche, c'est être
-pris.
+Conditions communes :
+
+- cafard placé en (0,50 ; 0,85), à découvert, à l'ouest de la chaise ;
+- l'humain le repère depuis l'allée et lance l'annonce à **0,39 m** de
+  lui, depuis (0,875 ; 0,730) ;
+- zone de **3,5 cm de rayon** (7 cm de diamètre) autour du point visé ;
+- vitesse de marche 0,08 m/s, accélération 0,1 s, freinage 0,08 s ;
+- dans tous les cas, rien ne couvre le cafard à la fin (vérifié par le
+  rayon vertical).
+
+| Essai | Avant l'annonce | Point visé | Pendant l'annonce (0,7 s) | Fin : distance au point visé | Résultat |
+|---|---|---|---|---|---|
+| A0 | Immobile | Sur le cafard (0 cm) | Marche à 90° de la ligne humain → cafard, **dès le début** | 5,3 cm parcourus → **5,3 cm** | S'échappe |
+| A1 | Immobile | 0 cm | Même direction, départ après **0,20 s** | 3,7 cm | S'échappe (de peu) |
+| A2 | Immobile | 0 cm | Même direction, départ après **0,30 s** | 2,9 cm | **Pris** |
+| B | Marche déjà à 0,08 m/s, à 92° de humain → cafard | **3,4 cm devant** lui (60 % de 0,7 s × 0,08) | **Continue tout droit** | 5,6 cm parcourus → **2,2 cm** | **Pris** |
+| C | Marche déjà (idem) | 3,4 cm devant | **S'arrête** (freinage : 0,3 cm) | 3,1 cm | **Pris** |
+| D | Marche déjà (idem) | 3,4 cm devant | **Tourne de 90°** (ici : droit à l'opposé de l'humain) | 5,1 cm parcourus → **5,8 cm** | S'échappe |
+
+**Pourquoi « s'échapper en marchant » et « être pris en ligne droite » ne
+se contredisent pas :** le point visé est figé au début de l'annonce, à la
+position du cafard **plus 60 % du trajet qu'il est en train de faire**.
+
+- Parti de l'arrêt (A0), le cafard n'avait pas de vitesse : la visée est
+  sur lui, et 5,3 cm de marche le sortent de la zone.
+- Déjà en marche (B), la visée est 3,4 cm devant lui. Continuer tout
+  droit le fait passer par ce point : il finit à 2,2 cm, dans la zone.
+- S'arrêter (C) le laisse 3,1 cm derrière la visée, encore dans la zone.
+- Changer de direction (D) l'écarte de la visée.
+
+Règle pour le joueur : **partir tout de suite si l'on était immobile ;
+tourner franchement si l'on marchait.** Le délai de réaction utile depuis
+l'immobilité est d'environ 0,2 s, et non 0,3 s comme écrit en F. En
+portant une miette, le cafard ne peut que marcher : continuer tout droit
+ou s'arrêter, c'est être pris.
+
+Cas non reproduits, calcul seulement :
+
+- sprint tout droit (sans charge) : 11,2 cm parcourus, visée à 6,7 cm,
+  fin à 4,5 cm → s'échappe ;
+- bord de couverture : c'est un cas mesuré (`threat_runner`, « capture
+  bloquée par un obstacle ») : 1,5 cm de marche vers le sud suffit pour
+  passer sous l'assise de la chaise, et la capture est bloquée.
 
 **Fenêtres de passage dans la routine :** quand l'humain fait face au plan
 de travail, son champ (±60°) ne couvre pas la nourriture ; quand il marche
@@ -166,11 +206,18 @@ vers l'est, il tourne le dos au refuge.
 ## Signal pour le joueur (≠ diagnostic)
 
 - **Pas :** `HumanBrain.footstep(position, force)` à chaque foulée
-  (0,45 m). Ces mêmes événements serviront à la tâche audio I.
+  (0,45 m). Ils alimentent aussi l'audio (tâche I, `docs/AUDIO.md`).
+- **Inspection** (tâche I) : `HumanBrain.inspecting(point)` à l'arrivée
+  au point de recherche, puis à chaque retournement du balayage (3 fois
+  pour une recherche complète). C'est un événement de présentation : il
+  ne change aucune règle.
 - **ThreatCues :** un pas à moins de **0,8 m** du cafard fait apparaître
   brièvement « 〰 vibrations 〰 ». La force diminue avec la distance. Pas
   de direction, pas de position, pas de silhouette à travers les murs.
-- **Zone rouge au sol** pendant l'annonce de capture.
+- **Zone rouge au sol** pendant l'annonce de capture (conservée : le son
+  n'est pas le seul indice).
+- **Audio** (tâche I) : pas, froissement de fouille, annonce, résolution,
+  entendus depuis le cafard. Voir `docs/AUDIO.md`.
 - Le reste (état, visibilité, dernière position, zone, recherche) est du
   **diagnostic**. Il n'est visible qu'avec F3 et masqué au lancement de
   cette scène.
@@ -207,21 +254,23 @@ masquée tant que la caméra s'y trouve.
   plinthe, avec l'humain juste à côté, la caméra est ramenée tout près du
   cafard et **aucune partie de l'humain n'est visible**. Seules les
   vibrations le trahissent (voir `validation/threat/sequence_vue_cafard_4.7.2.jpg`,
-  images 007 à 011). C'est un point à traiter avec l'audio (I) et les
-  indices visuels (J).
+  images 007 à 011). Depuis la tâche I, les pas et un froissement de
+  tissu à chaque mouvement d'inspection se font entendre (signal vérifié,
+  écoute humaine non faite). Les indices visuels restent pour J.
 
 Captures : `validation/threat/sequence_diagnostic_4.7.2.jpg` (vue de dessus
 de diagnostic : haut du corps, plan de travail, caisson et assise masqués ;
 anneau cyan = cafard, tige magenta = dernière position connue) et
 `validation/threat/sequence_vue_cafard_4.7.2.jpg` (ce que voit le joueur).
 - **Capture :** contre un cafard qui marche tout droit, l'anticipation de
-  60 % rend la fuite en ligne droite inefficace ; c'est voulu, mais la
-  règle doit être comprise. À valider en jeu.
+  60 % rend la fuite en ligne droite inefficace, et s'arrêter ne suffit
+  pas non plus (essais B et C ci-dessus). C'est voulu, mais la règle doit
+  être comprise. À valider en jeu.
 - Les pieds peuvent passer visuellement sur le cafard (aucune collision
   entre eux). La caméra est protégée, mais l'image peut surprendre.
 - Déplacements en lignes droites entre zones. Pas de contournement général
   d'obstacles : la route et les zones sont réglées pour ce niveau.
-- Les vibrations restent un texte provisoire, en attendant l'audio (I) et
-  les indices visuels (J).
+- Les vibrations restent un texte provisoire, en attendant les indices
+  visuels (J). L'audio (I) double les pas, sans les remplacer.
 - Rendu logiciel uniquement ; la scène tourne à environ la moitié du temps
   réel en headless. Aucune mesure de performance.

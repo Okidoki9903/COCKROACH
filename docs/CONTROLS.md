@@ -26,6 +26,13 @@ Depuis la tâche F, dans `kitchen_threat.tscn` : aucune nouvelle commande.
 F3 affiche aussi le diagnostic de l'humain ; « Recommencer » (bouton) après
 une capture ou une réussite.
 
+Depuis la tâche I, dans `kitchen_threat.tscn` : aucune nouvelle touche.
+**Volume** : en pause (Échap), trois curseurs sous le menu de pause
+(« Général », « Humain », « Ambiance »), de 0 à 100 % par pas de 5, à la
+souris ou au clavier (Tab puis flèches). 0 % coupe le bus. Les réglages
+durent la session (ils survivent à « Recommencer »), sans sauvegarde. F3
+liste aussi les derniers sons émis. Voir `docs/AUDIO.md`.
+
 Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 `drop` est lié au Q *physique*. Le test automatique vérifie ces deux points.

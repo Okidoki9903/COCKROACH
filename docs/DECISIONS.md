@@ -37,6 +37,10 @@
 | D33 | Capture annoncée 0,7 s, point figé avec 60 % d'anticipation, zone de 3,5 cm, bloquée par tout obstacle au-dessus | Évitable en changeant de mouvement ou en se couvrant | Provisoire ; lisibilité à valider |
 | D34 | Tentative de démonstration : un seul résultat terminal, recommencer reconstruit tout | Pas de sauvegarde ni de mort persistante | Actée (tâche F) |
 | D35 | Garde de caméra sur les pièces visibles de l'humain, plutôt que des corps physiques sur les pieds | Les corps attachés aux pieds suivaient mal le visuel | Actée (tâche F) |
+| D36 | Présentation audio séparée (`ThreatAudio`) : n'écoute que des signaux existants, un son par événement ; un seul événement ajouté (`inspecting`) | Aucun état d'IA reconstruit ; humain immobile silencieux, pas de sonar | Actée (tâche I) |
+| D37 | Écouteur sur le cafard (12 mm), tourné avec le lacet du regard, indépendant de la distance et de l'inclinaison de la caméra | La caméra rapprochée ne doit pas changer la proximité perçue | Actée (tâche I) |
+| D38 | Sons provisoires synthétisés par `tools/gen_audio.py` (Python standard, graines fixes) | Aucun téléchargement ni licence tierce ; reproductibles | Provisoire ; à remplacer par des sons produits |
+| D39 | Bus Master (limiteur −1 dB), Threat, Ambience ; occultation bornée à −6 dB + passe-bas 2,5 kHz | Marge garantie ; la couverture assourdit sans rendre muet | Provisoire ; niveaux à juger à l'écoute |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

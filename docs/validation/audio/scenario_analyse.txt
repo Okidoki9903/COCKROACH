@@ -1,0 +1,27 @@
+fichier : 48000 Hz, 2 canaux, 41.87 s
+crête globale -9.3 dBFS ; échantillons ≥ −1 dBFS : 0 ; ≥ 0 dBFS : 0
+
+t (s)   son        d (m)     dB  occ. | crête G crête D |   RMS G   RMS D |    G−D | attaque après l'événement
+   2.92 pas         0.44   -6.0   oui |   -29.7   -26.5 |   -39.4   -37.6 |   -1.8 | 21 ms   [caché sous les meubles, face au mur]
+   6.36 pas         0.36   -5.5   oui |   -21.1   -26.9 |   -34.1   -37.8 |   +3.6 | 22 ms   [caché sous les meubles, face au mur]
+   8.79 pas         0.33   -5.9   oui |   -20.1   -25.3 |   -34.4   -38.1 |   +3.6 | 21 ms   [caché sous les meubles, face au mur]
+  10.69 pas         0.46   -4.9   oui |   -27.8   -24.2 |   -38.6   -36.5 |   -2.1 | 63 ms   [caché sous les meubles, face au mur]
+  12.12 pas         0.71   -5.1   oui |   -33.0   -26.7 |   -40.0   -38.3 |   -1.7 | 60 ms   [caché sous les meubles, face au mur]
+  17.56 pas         0.96   +0.2   non |   -32.6   -25.0 |   -41.9   -38.0 |   -3.9 | 46 ms   [repéré : fuite vers le retrait de plinthe]
+  18.33 pas         0.51   -0.6   non |   -25.6   -18.0 |   -36.4   -31.2 |   -5.2 | 16 ms   [repéré : fuite vers le retrait de plinthe]
+  18.46 annonce     0.25   +0.0   non |   -11.5   -11.5 |   -29.1   -29.0 |   -0.0 | 368 ms   [repéré : fuite vers le retrait de plinthe]
+  19.16 raté        0.04   +1.4   non |   -12.8   -12.8 |   -32.5   -32.5 |   +0.0 | 45 ms   [repéré : fuite vers le retrait de plinthe]
+  20.13 fouille     0.52   -4.8   oui |   -27.6   -28.4 |   -39.6   -39.8 |   +0.1 | 315 ms   [recherche à côté de la cachette]
+  21.09 fouille     0.52   -6.1   oui |   -30.9   -31.5 |   -41.9   -42.0 |   +0.2 | —   [recherche à côté de la cachette]
+  23.13 fouille     0.52   -5.9   oui |   -30.9   -31.6 |   -41.9   -42.0 |   +0.1 | —   [recherche à côté de la cachette]
+  24.13 pas         0.23   -1.4   non |   -13.8   -17.8 |   -28.0   -31.8 |   +3.8 | 49 ms   [recherche abandonnée]
+  27.56 pas         0.30   -0.6   non |   -19.8   -15.6 |   -33.0   -29.1 |   -3.9 | 51 ms   [recherche abandonnée]
+  29.99 pas         0.28   +0.3   non |   -17.0   -14.4 |   -30.7   -28.2 |   -2.5 | 50 ms   [recherche abandonnée]
+  31.93 pas         0.37   -1.5   non |   -14.8   -25.0 |   -29.6   -37.7 |   +8.1 | 15 ms   [recherche abandonnée]
+  33.36 pas         0.87   +0.9   non |   -22.9   -31.1 |   -36.1   -41.4 |   +5.3 | 23 ms   [recherche abandonnée]
+  37.53 pas         1.02   +1.1   non |   -25.1   -30.6 |   -38.1   -41.2 |   +3.1 | 49 ms   [recherche abandonnée]
+  38.29 pas         0.64   -0.1   non |   -23.1   -25.6 |   -35.5   -36.8 |   +1.3 | 19 ms   [immobile à découvert]
+  38.63 annonce     0.24   +0.0   non |   -11.5   -11.5 |   -29.1   -29.1 |   +0.0 | 54 ms   [immobile à découvert]
+  39.33 attrapé     0.00   +0.0   non |    -9.3    -9.3 |   -23.8   -23.8 |   +0.0 | 49 ms   [immobile à découvert]
+
+exporté : menace_audio.wav (24000 Hz, 16 bits, stéréo)

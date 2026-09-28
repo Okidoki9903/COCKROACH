@@ -17,8 +17,12 @@ extends CharacterBody3D
 ## furniture (layer 1) blocks it. Pausable with the rest of the game.
 
 signal state_changed(state: State)
-## For the player's cues (and the future audio task): each stride.
+## For the player's cues and the audio: each stride.
 signal footstep(position: Vector3, strength: float)
+## An inspection movement during a search: on arriving at the spot, then
+## at each reversal of the sweep (the human turns to look elsewhere).
+## `point` is the inspected position. For the audio (cloth rustle).
+signal inspecting(point: Vector3)
 signal capture_started(point: Vector3, radius: float, duration: float)
 signal capture_resolved(success: bool)
 signal captured
@@ -173,7 +177,10 @@ func _search(delta: float) -> void:
 		_search_base_yaw = _yaw_to(last_known)
 	else:
 		velocity = Vector3.ZERO
+		var before := search_time
 		search_time += delta
+		if before == 0.0 or _sweep_half(before) != _sweep_half(search_time):
+			inspecting.emit(last_known)
 		var sweep := deg_to_rad(tuning.search_sweep) * sin(search_time / tuning.search_duration * TAU)
 		_turn_to(_search_base_yaw + sweep, delta)
 	if search_time >= tuning.search_duration or search_total >= tuning.search_max:
@@ -181,6 +188,12 @@ func _search(delta: float) -> void:
 		_waypoint = _nearest_waypoint()
 		_pause_left = 0.0
 		_set_state(State.ROUTINE)
+
+
+## Index of the sweep half in progress: changes when sin() turns back
+## (search_time = 1/4 and 3/4 of search_duration).
+func _sweep_half(t: float) -> int:
+	return floori(t / tuning.search_duration * 2.0 - 0.5)
 
 
 func _can_start_capture() -> bool:

@@ -1,0 +1,138 @@
+[
+  {
+    "label": "ambiance seule",
+    "t": 1.06666666666667
+  },
+  {
+    "label": "pas 0,30 m à droite (est, regard nord)",
+    "t": 2.86666666666666
+  },
+  {
+    "d": 0.300880372524261,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 2.86666666666666
+  },
+  {
+    "label": "pas 0,30 m à gauche (ouest, regard nord)",
+    "t": 4.16666666666666
+  },
+  {
+    "d": 0.300880372524261,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 4.16666666666666
+  },
+  {
+    "label": "pas 1,20 m à droite (est)",
+    "t": 5.46666666666665
+  },
+  {
+    "d": 1.2002204656601,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 5.46666666666665
+  },
+  {
+    "label": "pas 0,30 m est, regard sud (donc à gauche)",
+    "t": 6.76666666666665
+  },
+  {
+    "d": 0.300880372524261,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 6.76666666666665
+  },
+  {
+    "label": "pas 0,30 m devant (est, regard est)",
+    "t": 8.06666666666665
+  },
+  {
+    "d": 0.300880372524261,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 8.06666666666665
+  },
+  {
+    "label": "pas 0,30 m à droite, caméra à 2 cm",
+    "t": 9.66666666666673
+  },
+  {
+    "d": 0.300880372524261,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 9.66666666666673
+  },
+  {
+    "label": "pas 0,30 m derrière la plinthe (occulté)",
+    "t": 11.2666666666668
+  },
+  {
+    "d": 0.300880372524261,
+    "db": -6.0,
+    "kind": "pas",
+    "occluded": true,
+    "t": 11.2666666666668
+  },
+  {
+    "label": "pas 0,30 m à découvert (même disposition)",
+    "t": 12.8666666666669
+  },
+  {
+    "d": 0.300880432128906,
+    "db": 0.0,
+    "kind": "pas",
+    "occluded": false,
+    "t": 12.8666666666669
+  },
+  {
+    "d": 0.572838544845581,
+    "db": 0.0,
+    "kind": "fouille",
+    "occluded": false,
+    "t": 14.166666666667
+  },
+  {
+    "label": "fouille",
+    "t": 14.166666666667
+  },
+  {
+    "label": "annonce",
+    "t": 15.366666666667
+  },
+  {
+    "d": 0.243195399641991,
+    "db": 0.0,
+    "kind": "annonce",
+    "occluded": false,
+    "t": 15.366666666667
+  },
+  {
+    "d": 0.0500399954617023,
+    "db": 0.0,
+    "kind": "raté",
+    "occluded": false,
+    "t": 16.066666666667
+  },
+  {
+    "label": "attrapé (final)",
+    "t": 17.066666666667
+  },
+  {
+    "d": 0.0500399954617023,
+    "db": 0.0,
+    "kind": "attrapé",
+    "occluded": false,
+    "t": 17.066666666667
+  },
+  {
+    "label": "réussite (final, non positionnel)",
+    "t": 18.2666666666669
+  }
+]

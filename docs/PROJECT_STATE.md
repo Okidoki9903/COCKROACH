@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche F (humain et détection) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche I (première couche audio) terminée techniquement._
 
 ## Version du moteur (fixée)
 
@@ -50,6 +50,20 @@ et évitable, dans `scenes/levels/kitchen_threat.tscn` (composition autour de
 `kitchen_loop`). Un seul résultat terminal ; recommencer reconstruit tout.
 Voir `docs/HUMAN_AI.md`. Lisibilité et plaisir : non évalués.
 
+**Étape I : terminée techniquement, écoute humaine non faite.** Première
+couche audio de la menace, dans `kitchen_threat.tscn` :
+- pas, froissement de fouille, annonce et résolution de capture, retour
+  final, ronronnement discret ;
+- entendus depuis le cafard (écouteur sur le cafard, tourné avec le
+  regard), spatialisés, avec une occultation bornée ;
+- bus Master, Threat et Ambience ; volumes réglables en pause.
+
+La présentation n'écoute que des événements ; un seul événement a été
+ajouté (`inspecting`). Les essais de capture sont clarifiés dans
+`HUMAN_AI.md`, sans modifier les règles. Signal vérifié ; timbre,
+confort, localisation perçue et lisibilité non validés. Voir
+`docs/AUDIO.md`.
+
 Il reste des contrôles sur machine réelle (voir plus bas).
 
 ## Éléments du projet
@@ -95,13 +109,22 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | `scripts/threat/threat_debug.gd` | Diagnostic d'IA (F3) |
 | `scripts/threat/human_camera_guard.gd` | Caméra hors des pieds et jambes de l'humain |
 | `scenes/tests/threat_runner.tscn` + `.gd` | Scénarios de l'humain (36) et séquence rendue |
-| `docs/HUMAN_AI.md` | Route, états, paramètres, fenêtres de fuite, limites |
+| `docs/HUMAN_AI.md` | Route, états, paramètres, fenêtres de fuite (essais mesurés), limites |
+| `scripts/audio/threat_audio.gd` | `ThreatAudio` : événements de l'humain → sons, écouteur sur le cafard |
+| `scripts/audio/audio_settings.gd` | Curseurs de volume en pause |
+| `default_bus_layout.tres` | Bus Master (limiteur −1 dB), Threat, Ambience |
+| `assets/audio/*.wav` (+ `.import`) | 9 sons provisoires synthétisés |
+| `tools/gen_audio.py`, `tools/analyze_audio.py` | Générateur des sons ; analyse du signal enregistré |
+| `scenes/tests/audio_runner.tscn` + `.gd` | Contrôles audio (27), sonde et scénario enregistrés |
+| `scenes/tests/capture_trials_runner.tscn` + `.gd` | Essais de capture mesurés (7) |
+| `docs/AUDIO.md` | Audio : événements, provenance, écouteur, bus, cycle de vie, mesures, limites |
+| `docs/validation/audio/` | Clip stéréo du scénario, frises, images, analyses |
 | `docs/validation/threat/*.jpg` | Séquence repérage → recherche → routine |
 | `docs/validation/kitchen/*.jpg` | Plan annoté, vues à hauteur de cafard, séquence |
 | `docs/validation/movement/sequences_4.7.2.jpg` | Captures de référence |
 | `docs/validation/camera/*.jpg` | Captures de référence caméra |
 | `docs/.gdignore` | Empêche Godot d'importer la documentation comme ressource |
-| `data/`, `assets/` | Dossiers réservés (vides, `.gitkeep`) |
+| `data/`, `assets/` | Réglages (`data/tuning/`) et sons (`assets/audio/`) |
 | `docs/DECISIONS.md` | Décisions de production |
 | `docs/TEST_CHECKLIST.md` | Procédure de lancement, contrôles et historique |
 | `docs/validation/scale_test_forward_plus_4.7.2.png` | Capture de référence |
@@ -117,6 +140,19 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche I — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Événements, routage, écouteur, pause, fin, redémarrages | `audio_runner` | **27/27** |
+| Validité du test | 7 défauts injectés (double connexion, écouteur sur la caméra, lecteurs non pausables, pas d'arrêt à la fin, froissement sur chaque pas, lecteurs hors scène, son d'échec sur réussite) | Tous détectés (le 6e après correction du comptage) |
+| Règles de capture | `capture_trials_runner` : réglages + 6 essais ; `threat_runner` | **7/7** ; **36/36** inchangé |
+| Signal (sonde) | movie writer, 48 kHz stéréo, `tools/analyze_audio.py` | G/D ≈ ±10 dB, inversé par la rotation ; −21 dB de 0,3 à 1,2 m ; caméra à 2 cm sans effet ; occultation ≈ −7 dB ; crête −7,0 dBFS, rien ≥ −1 dBFS ; annonce +30 dB sur l'ambiance dans sa bande |
+| Signal (scénario) | approche hors champ, passages, recherche près de la cachette, annonce ratée, capture | 21 sons synchronisés (15–63 ms) ; crête −9,3 dBFS ; clip `validation/audio/scenario_menace_stereo_4.7.2.wav` |
+| Écoute humaine | — | **Non faite** : timbre, confort, localisation perçue, lisibilité non validés |
+| Panneau de volume | rendu en pause | affiché sous le menu ; 40 % → −7,96 dB ; 0 % coupe le bus |
+| Non-régression | B 57, C 54, D 47, E 52, G 66, F 36 ; scène principale | OK ; **identique au pixel près** |
 
 ## Vérifications tâche F — 2026-09-28
 
@@ -270,6 +306,12 @@ tous OK.
 
 ## Vérifications restantes
 
+- Tâche I, au casque puis sur haut-parleurs : timbre et crédibilité des
+  sons ; confort (pas répétés, ronronnement) ; localisation gauche/droite
+  perçue (devant/derrière non distingués) ; lisibilité de l'annonce, et
+  différence entre raté et attrapé ; audibilité des froissements près
+  de la cachette ; niveaux relatifs des trois bus ; pilote audio réel.
+
 - Tâche F, avec clavier, souris et écran : compréhension de l'approche
   (pieds, vibrations), du repérage et de la zone de capture ; temps de
   réaction réel face à 0,7 s d'annonce ; compréhension de la règle
@@ -321,5 +363,5 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche suivante selon la feuille de route : **I — Audio** (les événements de
-pas existent déjà). Suspicion globale et tâche J : non commencées.
+Tâche suivante selon la feuille de route : **J** (indices visuels), non
+commencée. La suspicion globale n'est pas commencée non plus.

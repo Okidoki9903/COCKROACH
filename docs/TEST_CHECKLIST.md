@@ -202,7 +202,8 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_loop.tscn` (F6).
 
 ## Étape F — humain
 
-Automatique (≈ 10 min, la scène tourne à environ la moitié du temps réel en headless) :
+Automatique. Durée : ≈ 10 min lors de la tâche F, ≈ 4 s lors de la tâche I
+(conteneur plus rapide ; la durée dépend de la machine) :
 
 ```sh
 $G --headless --fixed-fps 60 --path . res://scenes/tests/threat_runner.tscn   # attendu : code 0, 36/36
@@ -223,6 +224,41 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_threat.tscn` (F6).
 | Sortie complète (boire, prendre, déposer) en évitant l'humain | « Sortie réussie : tentative terminée » | ✅ automatisé (commandes seules) · ⏳ joueur réel |
 | F3 | diagnostic de l'IA affiché ou masqué | ✅ automatisé |
 
+## Étape I — audio
+
+Automatique (quelques secondes ici). Toujours lancer avec un délai
+externe : une erreur d'analyse du script empêche le watchdog interne de
+démarrer.
+
+```sh
+timeout 300 $G --headless --fixed-fps 60 --path . res://scenes/tests/audio_runner.tscn           # attendu : code 0, 27/27
+timeout 300 $G --headless --fixed-fps 60 --path . res://scenes/tests/capture_trials_runner.tscn  # attendu : code 0, 7/7
+```
+
+Attention : `camera_test_runner` mesure en temps réel. Il se lance
+**sans** `--fixed-fps` (commande de l'étape C). Avec ce drapeau, sur une
+machine rapide, il tombe sur son watchdog après 36 contrôles : constaté
+aussi sur c986288, ce n'est pas une régression.
+
+Signal (rendu requis ; voir `docs/AUDIO.md` pour les commandes) : sonde
+`--probe` et scénario `--clip`, puis `tools/analyze_audio.py`.
+
+Manuel, **au casque**, sur machine réelle : lancer `kitchen_threat.tscn`.
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Caché sous les meubles, l'humain passe | pas assourdis mais audibles, du bon côté | ✅ signal (occulté −6 dB, G/D) · ⏳ écoute |
+| Tourner le regard pendant un pas | le son change de côté | ✅ signal (±10 dB inversé) · ⏳ écoute |
+| Caméra rapprochée (mur, meuble) | même proximité sonore | ✅ signal (±0,3 dB) · ⏳ écoute |
+| Humain immobile (pause de routine, doute) | silence | ✅ automatisé |
+| Recherche à côté de la cachette | froissements, 3 par recherche | ✅ automatisé · ✅ signal · ⏳ audibilité réelle |
+| Zone rouge | annonce brève et audible dès le début, en plus de la zone | ✅ automatisé · ✅ signal · ⏳ lisibilité |
+| Capture ratée / réussie | claque claire / coup sourd, différents | ✅ automatisé · ⏳ écoute |
+| Échap pendant un son ou l'annonce | son suspendu, reprise sans rafale | ✅ automatisé |
+| Volume en pause (3 curseurs) | effet immédiat ; 0 % coupe | ✅ rendu + valeurs · ⏳ souris réelle |
+| Recommencer plusieurs fois | aucun son doublé | ✅ automatisé |
+| Timbre, confort, niveaux relatifs | agréables, rien de criard | ⏳ **non évalué** |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -235,6 +271,7 @@ Manuel, sur machine réelle : lancer `scenes/levels/kitchen_threat.tscn` (F6).
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche E : 52/52 ; deux repères de lisibilité ajoutés ; B 57/57, C 54/54, D 47/47 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche G : 66/66 ; miette portée déplacée sur la tête, collision du biscuit ajoutée ; B–E inchangés et verts ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche F : 36/36 ; départ au fond du refuge, jonction de l'humain et caméra dans les pieds corrigées ; B–G verts ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe, pilote audio factice + movie writer | 4.7.2-stable | Tâche I : audio 27/27, essais de capture 7/7 ; signal mesuré, **aucune écoute** ; ambiance baissée, annonce raccourcie en attaque, fouille remontée après mesure ; B–G et F verts ; référence identique |
 
 ## Script d'installation pour un environnement distant
 

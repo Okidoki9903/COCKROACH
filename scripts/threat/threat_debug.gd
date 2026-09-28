@@ -2,10 +2,13 @@ extends CanvasLayer
 ## AI diagnostics, shown only while the level diagnostic panel is shown
 ## (F3). Internal information: state, visibility, confirmation, last known
 ## position (also as a marker in the world), search time, capture zone.
-## Everything disappears when hidden.
+## Everything disappears when hidden. Also lists the last sounds started
+## by the audio presenter: a check of the events, not a substitute for
+## listening.
 
 @export var human: HumanBrain
 @export var level_panel: Control
+@export var audio: ThreatAudio
 
 var _label: Label
 var _lkp_marker: MeshInstance3D
@@ -61,3 +64,5 @@ func _process(_delta: float) -> void:
 		human.search_time, t.search_duration, human.search_total, t.search_max,
 		zone, human.cooldown_left,
 	]
+	if audio:
+		_label.text += "\n\nAUDIO  %d sons émis (derniers, distance aux oreilles)\n%s" % [audio.emissions, "\n".join(audio.recent)]
