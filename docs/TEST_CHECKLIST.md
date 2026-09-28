@@ -176,6 +176,30 @@ F3 masque le panneau ; Échap libère la souris pour les boutons.
 | Retour au refuge depuis la nourriture | repère visible, chemin compris | ✅ capture (prise murale) · ⏳ joueur réel |
 | Tunnel sous les meubles | pas monotone au point de gêner | ⏳ jugement manuel |
 
+## Étape G — boucle de ressources
+
+Automatique :
+
+```sh
+$G --headless --fixed-fps 60 --path . res://scenes/tests/resource_loop_runner.tscn   # attendu : code 0, 66/66
+```
+
+Manuel, sur machine réelle : lancer `scenes/levels/kitchen_loop.tscn` (F6).
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Aller à la source, E | miette sur la tête, halo éteint, biscuit en place | ✅ automatisé · ✅ séquence · ⏳ joueur réel |
+| Maj en portant | reste à la marche ; charge affichée | ✅ automatisé · ✅ séquence |
+| Lâcher (A en AZERTY, Q en QWERTY), puis Maj | miette au sol, sprint possible | ✅ automatisé · ⏳ libellé AZERTY à l'écran |
+| Revenir sur la miette, E | reprise | ✅ automatisé · ✅ séquence |
+| Lâcher collé à un mur ou dans un recoin | posée du bon côté ou « pas de place » | ✅ automatisé (fixtures) · ⏳ joueur réel |
+| Miette derrière la plinthe | non sélectionnable | ✅ automatisé |
+| Refuge, E (plusieurs fois) | dépôt unique, objectif coché | ✅ automatisé · ✅ séquence |
+| Eau, E (plusieurs fois) | éclair bleu, objectif coché une fois | ✅ automatisé · ✅ séquence |
+| Les deux objectifs | « Sortie réussie », déplacement libre | ✅ automatisé · ✅ séquence |
+| Échap puis « Réinitialiser la session » | tout revient à l'état initial | ✅ automatisé · ⏳ bouton cliqué à la souris |
+| Portée de 2 cm | confortable | ⏳ jugement manuel |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -186,6 +210,7 @@ F3 masque le panneau ; Échap libère la souris pour les boutons.
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche C : 54/54 ; défaut de dégagement près des murs → corrigé ; B 57/57 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche D : 47/47 ; marge 1 mm → 0,2 mm, latence d'entrée et respiration caméra corrigées ; B 57/57, C 54/54 ; référence identique |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche E : 52/52 ; deux repères de lisibilité ajoutés ; B 57/57, C 54/54, D 47/47 ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Tâche G : 66/66 ; miette portée déplacée sur la tête, collision du biscuit ajoutée ; B–E inchangés et verts ; référence identique |
 
 ## Script d'installation pour un environnement distant
 

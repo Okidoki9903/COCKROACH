@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche E (blockout de cuisine) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche G (boucle de ressources) terminée._
 
 ## Version du moteur (fixée)
 
@@ -39,7 +39,12 @@ caméra, parcours `movement_test`. Voir `docs/MOVEMENT.md`.
 route couverte sous les meubles (2,40 m, 30 s), bascule, détour vers l'eau, et
 repères inertes de nourriture et d'eau. Voir `docs/LEVEL_BLOCKOUT.md`.
 
-Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche G.
+**Étape G : terminée.** Boucle jouable dans `scenes/levels/kitchen_loop.tscn`
+(composition autour de la cuisine, inchangée) : prélever, porter en marchant,
+lâcher, reprendre, boire, déposer ; la réussite demande l'eau et le dépôt.
+Réinitialisation depuis la pause. Voir `docs/RESOURCE_LOOP.md`.
+
+Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche F.
 
 ## Éléments du projet
 
@@ -70,6 +75,13 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | `scripts/ui/level_debug_panel.gd` | Panneau de niveau : position, chronomètre de trajet, retours ; F3 |
 | `scenes/tests/kitchen_route_runner.tscn` + `.gd` | Parcours automatisé des routes, captures |
 | `docs/LEVEL_BLOCKOUT.md` | Plan, dimensions, routes, temps, limites |
+| `scenes/levels/kitchen_loop.tscn` + `scripts/levels/kitchen_loop.gd` | Session jouable : cuisine + boucle de ressources ; réinitialisation |
+| `scripts/resources/*.gd` | `Interactable`, `Crumb`, `FoodSource`, `WaterPoint`, `RefugeDeposit`, `CarrySlot` |
+| `scripts/player/player_interactor.gd` | Sélection de cible, E et lâcher |
+| `scripts/game/session_state.gd` | Objectifs de la session (mémoire seulement) |
+| `scripts/ui/loop_hud.gd` | Interface minimale de la boucle |
+| `scenes/tests/resource_loop_runner.tscn` + `.gd`, `scripts/tests/fake_interactable.gd` | Scénarios de la boucle (66) et séquence rendue |
+| `docs/RESOURCE_LOOP.md` | Boucle : commandes, états, réglages, vérifications, limites |
 | `docs/validation/kitchen/*.jpg` | Plan annoté, vues à hauteur de cafard, séquence |
 | `docs/validation/movement/sequences_4.7.2.jpg` | Captures de référence |
 | `docs/validation/camera/*.jpg` | Captures de référence caméra |
@@ -90,6 +102,15 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche G — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Scénarios de la boucle | `resource_loop_runner` (touches et sélection de cible réelles) | **66/66** |
+| Validité du test | 5 défauts injectés (reprise à la source, vue dégagée, rebord, sprint, double dépôt) | 4 détectés directement ; le 5ᵉ est couvert par une seconde règle, et désactiver les deux est détecté |
+| Rendu | Séquence prendre → sprint refusé → lâcher → reprendre → déposer → boire | Caméra dans le biscuit → corrigé ; miette visible sur la tête |
+| Non-régression | B 57/57, C 54/54, D 47/47, E 52/52 ; scène principale | OK, aucune attente modifiée ; **identique au pixel près** |
 
 ## Vérifications tâche E — 2026-09-28
 
@@ -215,7 +236,12 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour G)
+## Vérifications restantes (non bloquantes pour F)
+
+- Tâche G, avec clavier, souris et écran : confort de la portée de 2 cm,
+  lisibilité de l'action proposée, des objectifs et du lâcher refusé,
+  libellé AZERTY de la touche lâcher, visibilité de la miette sur la tête
+  et de la pile au refuge.
 
 - Tâche E, à l'écran avec clavier et souris : compréhension de la première
   sortie, lisibilité de la destination et du retour, choix entre les deux
@@ -257,4 +283,4 @@ tous OK.
 
 ## Prochaine tâche
 
-Tâche **G — Gameplay systems : ressources et retour**. **Non commencée.**
+Tâche **F — NPC / AI : humain**. **Non commencée.**

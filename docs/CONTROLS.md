@@ -17,6 +17,11 @@ ce qui les rend indépendantes de la disposition du clavier.
 | `pause` | Échap | Échap | une fois par pression (bascule) |
 | `toggle_debug` | F3 | F3 | masque ou affiche le panneau de diagnostic du niveau (tâche E) |
 
+Depuis la tâche G, dans `kitchen_loop.tscn` : **E** prélève, reprend, boit
+ou dépose selon la cible ; la touche **lâcher** (Q physique, A en AZERTY)
+pose la miette ; le sprint est refusé tant qu'une miette est portée. Voir
+`docs/RESOURCE_LOOP.md`.
+
 Aucune position physique n'est partagée entre deux actions. Sur AZERTY, la
 touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 `drop` est lié au Q *physique*. Le test automatique vérifie ces deux points.

@@ -32,6 +32,9 @@ extends CharacterBody3D
 
 ## Horizontal velocity requested this tick (m/s), for diagnostics.
 var requested_velocity := Vector3.ZERO
+## Set by another system (e.g. CarrySlot while a load is carried): the
+## sprint input is ignored and the body walks. Takes effect next tick.
+var sprint_blocked := false
 
 var _brake_rate := 0.0
 var _braking := false
@@ -55,7 +58,7 @@ func _physics_process(delta: float) -> void:
 	# x right, y forward; forward is -Z. Only the yaw is used, so looking
 	# down never shortens the horizontal move.
 	var wish := Vector3(input.x, 0.0, -input.y).rotated(Vector3.UP, heading)
-	var target_speed := sprint_speed if sprinting else walk_speed
+	var target_speed := sprint_speed if sprinting and not sprint_blocked else walk_speed
 	requested_velocity = wish * target_speed
 
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)

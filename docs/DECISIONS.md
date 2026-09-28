@@ -27,6 +27,11 @@
 | D23 | Route couverte = dessous des meubles bas, derrière une plinthe en retrait à trois brèches | Couverture crédible, bascule possible, 10 cm de hauteur pour la caméra | Actée (tâche E) |
 | D24 | Repères de nourriture et de refuge visibles de loin (biscuit de 3 cm, prise murale) | Les repères plats étaient invisibles à hauteur de cafard | Actée (tâche E) |
 | D25 | Scènes de parcours écrites par des outils hors ligne (`tools/*.py`) | Dimensions exactes et modifiables ; aucune génération à l'exécution | Actée |
+| D26 | Boucle de ressources dans une scène de composition (`kitchen_loop.tscn`) autour de la cuisine | La cuisine, son générateur et ses tests restent inchangés | Actée (tâche G) |
+| D27 | Une miette unique qui porte sa machine d'états ; aucun inventaire | Rend impossibles duplication et double comptage | Actée (tâche G) |
+| D28 | Portée d'interaction de 2 cm depuis l'enveloppe du corps, avec vue dégagée | Interaction liée au corps, pas à la caméra ; pas à travers les murs | Provisoire ; confort à juger |
+| D29 | Transport = marche forcée via `PlayerMotor.sprint_blocked` | Changement minimal du moteur ; `PlayerInput` intact | Actée (tâche G) |
+| D30 | Miette portée sur la tête, pas devant | Devant, elle entrait de 10,5 mm dans les murs | Actée (tâche G) |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development
