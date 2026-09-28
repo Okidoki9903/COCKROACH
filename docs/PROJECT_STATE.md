@@ -162,6 +162,18 @@ Il reste des contrôles sur machine réelle (voir plus bas).
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
 
+## Manette — 2026-09-28
+
+Support natif, demandé après la version Windows :
+- liaisons manette sur les actions existantes ;
+- regard au stick droit ;
+- menus de pause et de fin de tentative utilisables à la manette ;
+- invites [A] et [B].
+
+Tests : B 74/74, J 44/44, toutes les autres suites inchangées et vertes,
+scène principale identique au pixel près. **Non essayé avec une vraie
+manette.** Voir `docs/CONTROLS.md`.
+
 ## Version jouable Windows — 2026-09-28
 
 Construite à partir de 9c14156, sans nouvelle fonctionnalité :

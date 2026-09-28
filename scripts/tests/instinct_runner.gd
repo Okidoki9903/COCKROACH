@@ -420,6 +420,60 @@ func _run() -> void:
 	_check(frozen_w and _cues.warning_left < left, "pause pendant l'annonce : barre figée, reprend ensuite")
 	await _reset()
 
+	_section("manette : jeu, menu de pause, fin de tentative")
+	_light.set_on(false)
+	await _pin(Vector2(1.7, 0.9), 0.0)
+	_place(Vector2(0.4, 0.85))
+	await _joy_button(JOY_BUTTON_A, false)
+	var p0 := _player.global_position
+	var yaw0 := _rig.yaw
+	await _joy_axis(JOY_AXIS_LEFT_Y, -1.0)
+	await _joy_axis(JOY_AXIS_RIGHT_X, 1.0)
+	await _ticks(30)
+	await _joy_axis(JOY_AXIS_LEFT_Y, 0.0)
+	await _joy_axis(JOY_AXIS_RIGHT_X, 0.0)
+	var moved := _flat(p0, _player.global_position)
+	print("  stick gauche 0,5 s : %.3f m ; stick droit : lacet %.2f → %.2f rad" % [moved, yaw0, _rig.yaw])
+	_check(moved > 0.025 and _rig.yaw < yaw0 - 0.5, "sticks : le cafard avance et la caméra tourne (vers la droite)")
+	var hud_prompt: Label = _scene.get_node("Loop/Hud")._prompt
+	await _joy_button(JOY_BUTTON_START, true)
+	await _joy_button(JOY_BUTTON_START, false)
+	await frame_done
+	var master: HSlider = _scene.get_node("AudioSettings").sliders[&"Master"]
+	var focus0 := get_viewport().gui_get_focus_owner()
+	_check(get_tree().paused and focus0 == master, "Start : pause, focus sur le premier curseur de volume (pas sur « Réinitialiser »)")
+	await _joy_button(JOY_BUTTON_DPAD_LEFT, true)
+	await _joy_button(JOY_BUTTON_DPAD_LEFT, false)
+	var lowered := master.value
+	await _joy_button(JOY_BUTTON_DPAD_RIGHT, true)
+	await _joy_button(JOY_BUTTON_DPAD_RIGHT, false)
+	await _joy_button(JOY_BUTTON_DPAD_DOWN, true)
+	await _joy_button(JOY_BUTTON_DPAD_DOWN, false)
+	var focus1 := get_viewport().gui_get_focus_owner()
+	print("  croix gauche : volume %d %% ; croix bas : focus sur %s" % [lowered, focus1.get_path() if focus1 else "rien"])
+	_check(lowered == 95.0 and master.value == 100.0 and focus1 != null and focus1 != master, "croix : règle le curseur, puis passe au contrôle suivant")
+	await _joy_button(JOY_BUTTON_START, true)
+	await _joy_button(JOY_BUTTON_START, false)
+	await frame_done
+	_check(not get_tree().paused and get_viewport().gui_get_focus_owner() == null and _scene.result == "", "Start : reprise, plus de focus de menu, rien réinitialisé")
+	_check(hud_prompt.text == "" or hud_prompt.text.begins_with("[A]"), "invite d'action à la manette : [A]")
+	await _pin(Vector2(0.8, 0.72), deg_to_rad(90.0))
+	_place(Vector2(0.5, 0.85))
+	await _until(func() -> bool: return _scene.result != "", 60 * 20)
+	await frame_done
+	var restart: Button = _scene.get_node("Outcome/Box/Restart")
+	_check(_scene.result == "capture" and get_viewport().gui_get_focus_owner() == restart, "capture : focus sur « Recommencer »")
+	_fresh = null
+	_scene.session_reset.connect(func(f: KitchenThreat) -> void: _fresh = f)
+	await _joy_button(JOY_BUTTON_A, true)
+	await _joy_button(JOY_BUTTON_A, false)
+	await _ticks(5)
+	_check(_fresh != null, "A sur « Recommencer » : nouvelle tentative")
+	if _fresh:
+		_bind(_fresh)
+		await _ticks(5)
+	PlayerInput.using_gamepad = false
+
 	_section("recommencer plusieurs fois")
 	var base := _links()
 	for k in 4:
@@ -438,6 +492,29 @@ func _links() -> Array:
 	return [_human.footstep.get_connections().size(), _human.inspecting.get_connections().size(),
 		_human.capture_started.get_connections().size(), _scene.outcome.get_connections().size(),
 		get_tree().root.find_children("ExposureLight", "", true, false).size(), discs]
+
+
+func _joy_button(button: JoyButton, pressed: bool) -> void:
+	var e := InputEventJoypadButton.new()
+	e.device = 0
+	e.button_index = button
+	e.pressed = pressed
+	Input.parse_input_event(e)
+	await frame_done
+	await frame_done
+
+
+func _joy_axis(axis: JoyAxis, value: float) -> void:
+	var e := InputEventJoypadMotion.new()
+	e.device = 0
+	e.axis = axis
+	e.axis_value = value
+	Input.parse_input_event(e)
+	await frame_done
+
+
+func _flat(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
 func _box(at: Vector3, size: Vector3) -> StaticBody3D:

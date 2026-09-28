@@ -61,7 +61,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	var was := _box.visible
 	_box.visible = get_tree().paused
+	# Gamepad: the pause menu needs a focused control for the D-pad and A.
+	# The first volume slider, never the reset button (no accidental reset).
+	if _box.visible and not was and PlayerInput.using_gamepad and get_viewport().gui_get_focus_owner() == null:
+		sliders[&"Master"].grab_focus()
 
 
 ## percent: 0..100 of the bus's nominal level (0 dB); 0 mutes.

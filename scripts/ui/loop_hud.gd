@@ -64,19 +64,32 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var paused := get_tree().paused
+	if paused and not _pause_box.visible and PlayerInput.using_gamepad:
+		_focus_pause_menu.call_deferred()
 	_pause_box.visible = paused
 	if _message_left > 0.0:
 		_message_left -= delta
 		if _message_left <= 0.0:
 			_message.text = ""
-	_prompt.text = "" if paused or interactor.prompt == "" else "[%s] %s" % [_interact_key, interactor.prompt]
+	var interact_key := "A" if PlayerInput.using_gamepad else _interact_key
+	var drop_key := "B" if PlayerInput.using_gamepad else _drop_key
+	_prompt.text = "" if paused or interactor.prompt == "" else "[%s] %s" % [interact_key, interactor.prompt]
 	if carry.has_item():
-		_load.text = "Charge : une miette — marche seulement · [%s] lâcher" % _drop_key
+		_load.text = "Charge : une miette — marche seulement · [%s] lâcher" % drop_key
 	else:
 		_load.text = "Charge : aucune"
 	_objectives.text = "Objectifs\n%s Boire\n%s Rapporter une miette au refuge" % [
 		"☑" if session.drank else "☐", "☑" if session.reserve > 0 else "☐"]
 	_success.text = "Sortie réussie" if session.success else ""
+
+
+## Gamepad only, when no other menu took the focus (kitchen_loop alone):
+## the reset button, so the D-pad and A work in the pause menu.
+func _focus_pause_menu() -> void:
+	if _pause_box.visible and get_viewport().gui_get_focus_owner() == null:
+		for c in _pause_box.get_children():
+			if c is Button:
+				c.grab_focus()
 
 
 func _flash(text: String) -> void:

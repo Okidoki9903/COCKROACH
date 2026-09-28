@@ -36,6 +36,10 @@ func set_paused(value: bool) -> void:
 	if get_tree().paused == value:
 		return
 	get_tree().paused = value
+	# Back in the game, no menu control keeps the focus: A, Enter or Space
+	# must not press a hidden or diagnostic button instead of acting.
+	if not value:
+		get_viewport().gui_release_focus()
 	_apply_mouse_mode()
 	paused_changed.emit(value)
 

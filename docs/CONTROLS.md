@@ -49,7 +49,43 @@ touche **Q** déplace à gauche et la touche **A** lâche la charge, puisque
 
 Souris (tâche C) : le mouvement relatif oriente la caméra. Il ne passe pas
 par une action InputMap : `PlayerInput` lit directement
-`InputEventMouseMotion`. Voir `docs/CAMERA.md`. Manette : hors périmètre.
+`InputEventMouseMotion`. Voir `docs/CAMERA.md`.
+
+## Manette (depuis la version jouable Windows)
+
+Les actions existantes ont reçu des liaisons manette dans `project.godot`.
+Les touches du clavier sont inchangées, et clavier, souris et manette
+marchent ensemble. Godot reconnaît les manettes courantes (Xbox,
+PlayStation, 8BitDo…) par la base SDL ; ce sont les **positions** des
+boutons qui comptent (A = bouton du bas).
+
+| Manette (disposition Xbox / X-input) | Action |
+|---|---|
+| Stick gauche ou croix | se déplacer (`move_*`, zone morte 0,2) |
+| Stick droit | regarder (`look_*`, zone morte 0,15, 2,5 rad/s à fond, réponse au carré) |
+| RB, gâchette droite ou clic du stick gauche | sprint |
+| A | interagir (et valider dans les menus) |
+| B | lâcher la miette |
+| Start | pause / reprise |
+| Back / Select | diagnostic (F3) |
+
+- **Regard :** le stick droit ajoute une vitesse à la même file que la
+  souris (`PlayerInput.consume_look`), intégrée une fois par tick
+  physique. La caméra n'est pas modifiée. Réglages :
+  `PlayerInput.stick_look_speed` et `invert_look_y`.
+- **Menus :** le dernier appareil utilisé est retenu
+  (`PlayerInput.using_gamepad`).
+  - À la manette, la pause donne le focus au premier curseur de volume,
+    jamais à « Réinitialiser » (pas de remise à zéro accidentelle).
+  - La croix navigue et règle les curseurs ; A valide (ajouté à
+    `ui_accept`, qui ne contient par défaut qu'Entrée et Espace).
+  - En fin de tentative, « Recommencer » a le focus : A ou Entrée
+    recommence.
+  - À la reprise, aucun contrôle ne garde le focus : A reste « interagir ».
+- **Invites :** « [A] Boire », « [B] lâcher » à la manette ; les touches
+  du clavier sinon.
+- **Non vérifié avec une vraie manette :** les tests envoient des
+  événements manette simulés.
 
 ## `PlayerInput` (`scripts/player/player_input.gd`)
 

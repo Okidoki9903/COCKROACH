@@ -44,6 +44,7 @@
 | D40 | Instinct visuel dans `ThreatCues` (même composant que les vibrations de F) : un indice par événement réel, direction par secteurs de 45° relatifs au regard, figée à l'événement | Pas de doublon ; ne révèle ni position exacte ni état de l'IA | Actée (tâche J) |
 | D41 | Lumière = `ExposureLight` (lampe + zone logique, un seul interrupteur) dans une scène héritée `kitchen_instinct.tscn` | Rendu et logique ne peuvent diverger ; `kitchen_threat` et les références inchangées | Actée (tâche J) |
 | D42 | Exposition à 2 niveaux ; exposé et vu → confirmation ×1,5, doute engagé conservé à la bascule | La lumière accélère, ne fait jamais voir ; approximation de jeu | Provisoire ; multiplicateur à régler en jeu |
+| D43 | Manette : liaisons ajoutées aux actions existantes ; regard au stick droit dans `PlayerInput`, vers la même file que la souris ; focus de menu seulement à la manette, jamais sur « Réinitialiser » ; A ajouté à `ui_accept` ; focus libéré à la reprise | Aucun changement de caméra ni de règle ; clavier et souris inchangés | Actée ; sensibilité à régler avec une vraie manette |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

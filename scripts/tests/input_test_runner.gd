@@ -7,7 +7,7 @@ extends Node
 
 const INPUT_TEST := preload("res://scenes/tests/input_test.tscn")
 const EPS := 0.001
-const WATCHDOG_SECONDS := 30.0
+const WATCHDOG_SECONDS := 60.0
 
 var _failures := 0
 var _checks := 0
@@ -166,6 +166,77 @@ func _run() -> void:
 	_expect_vec(Vector2.ZERO, "no stuck movement after resume")
 	_check(not _input.sprint_held, "no stuck sprint after resume")
 
+	_section("gamepad (simulated events, standard SDL layout)")
+	await _joy_button(JOY_BUTTON_A, true)
+	_check(PlayerInput.using_gamepad, "a pad button switches prompts and menus to gamepad")
+	await _joy_button(JOY_BUTTON_A, false)
+	await _joy_axis(JOY_AXIS_LEFT_Y, -1.0)
+	_expect_vec(Vector2(0, 1), "left stick up = forward")
+	await _joy_axis(JOY_AXIS_LEFT_Y, 0.0)
+	await _joy_axis(JOY_AXIS_LEFT_X, 1.0)
+	_expect_vec(Vector2(1, 0), "left stick right")
+	await _joy_axis(JOY_AXIS_LEFT_X, 0.5)
+	var half := _input.move_vector.x
+	_check(half > 0.3 and half < 0.45, "half tilt is partial, after the 0.2 deadzone (got %.3f)" % half)
+	await _joy_axis(JOY_AXIS_LEFT_X, 0.1)
+	_expect_vec(Vector2.ZERO, "tilt inside the deadzone")
+	await _joy_axis(JOY_AXIS_LEFT_X, 0.0)
+	await _joy_button(JOY_BUTTON_DPAD_LEFT, true)
+	_expect_vec(Vector2(-1, 0), "D-pad left")
+	await _joy_button(JOY_BUTTON_DPAD_LEFT, false)
+	await _joy_button(JOY_BUTTON_RIGHT_SHOULDER, true)
+	_check(_input.sprint_held, "RB sprints")
+	await _joy_button(JOY_BUTTON_RIGHT_SHOULDER, false)
+	await _joy_axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)
+	_check(_input.sprint_held, "right trigger sprints")
+	await _joy_axis(JOY_AXIS_TRIGGER_RIGHT, 0.0)
+	_check(not _input.sprint_held, "sprint released")
+	_interacts = 0
+	_drops = 0
+	await _joy_button(JOY_BUTTON_A, true)
+	await _frames(10)
+	await _joy_button(JOY_BUTTON_A, false)
+	await _joy_button(JOY_BUTTON_B, true)
+	await _joy_button(JOY_BUTTON_B, false)
+	_check(_interacts == 1 and _drops == 1, "A interacts once while held, B drops (got %d, %d)" % [_interacts, _drops])
+	# Right stick: a speed, integrated once per physics tick.
+	_input.consume_look()
+	await _joy_axis(JOY_AXIS_RIGHT_X, 1.0)
+	_input.consume_look()
+	for i in 60:
+		await get_tree().physics_frame
+	var turn := _input.consume_look()
+	await _joy_axis(JOY_AXIS_RIGHT_X, 0.0)
+	print("  right stick full right for 60 ticks: %.3f rad (speed %.1f rad/s)" % [turn.x, _input.stick_look_speed])
+	_check(absf(turn.x - _input.stick_look_speed) < 0.1 and absf(turn.y) < EPS, "right stick turns right at stick_look_speed, once per tick")
+	await _joy_axis(JOY_AXIS_RIGHT_Y, -1.0)
+	_input.consume_look()
+	for i in 10:
+		await get_tree().physics_frame
+	var up := _input.consume_look()
+	await _joy_axis(JOY_AXIS_RIGHT_Y, 0.0)
+	_input.consume_look()
+	for i in 10:
+		await get_tree().physics_frame
+	_check(up.y > 0.3 and _input.consume_look() == Vector2.ZERO, "right stick up looks up; at rest nothing accumulates")
+	await _joy_button(JOY_BUTTON_START, true)
+	await _joy_button(JOY_BUTTON_START, false)
+	_check(get_tree().paused, "Start pauses")
+	await _joy_axis(JOY_AXIS_LEFT_Y, -1.0)
+	await _joy_axis(JOY_AXIS_RIGHT_X, 1.0)
+	for i in 10:
+		await get_tree().physics_frame
+	_check(_input.move_vector == Vector2.ZERO and _input.consume_look() == Vector2.ZERO, "sticks neutral while paused")
+	await _joy_axis(JOY_AXIS_RIGHT_X, 0.0)
+	await _joy_button(JOY_BUTTON_START, true)
+	await _joy_button(JOY_BUTTON_START, false)
+	_check(not get_tree().paused, "Start resumes")
+	_expect_vec(Vector2(0, 1), "still-tilted stick applies again after resume")
+	await _joy_axis(JOY_AXIS_LEFT_Y, 0.0)
+	await _key(KEY_W, true)
+	await _key(KEY_W, false)
+	_check(not PlayerInput.using_gamepad, "a key switches back to keyboard")
+
 	_section("marker does not move")
 	var marker: Node3D = get_node("InputTest/ScaleTest/CockroachMarker")
 	_check(marker.position.is_equal_approx(Vector3(0, 0.003, 0)), "CockroachMarker unchanged")
@@ -181,6 +252,24 @@ func _key_raw(physical: Key, logical: Key, pressed: bool, echo := false) -> void
 	e.keycode = logical
 	e.pressed = pressed
 	e.echo = echo
+	Input.parse_input_event(e)
+	await _frames()
+
+
+func _joy_button(button: JoyButton, pressed: bool) -> void:
+	var e := InputEventJoypadButton.new()
+	e.device = 0
+	e.button_index = button
+	e.pressed = pressed
+	Input.parse_input_event(e)
+	await _frames()
+
+
+func _joy_axis(axis: JoyAxis, value: float) -> void:
+	var e := InputEventJoypadMotion.new()
+	e.device = 0
+	e.axis = axis
+	e.axis_value = value
 	Input.parse_input_event(e)
 	await _frames()
 

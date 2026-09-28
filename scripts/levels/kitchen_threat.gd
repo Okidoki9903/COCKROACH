@@ -53,6 +53,8 @@ func _finish(kind: String) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_message.text = "Attrapé !" if kind == "capture" else "Sortie réussie : tentative terminée"
 	_overlay.visible = true
+	# Keyboard Enter / gamepad A restart without the mouse.
+	$Outcome/Box/Restart.grab_focus()
 	outcome.emit(kind)
 
 

@@ -82,7 +82,7 @@ Capture de référence :
 Automatique (à relancer après toute modification des entrées) :
 
 ```sh
-$G --headless --path . res://scenes/tests/input_test_runner.tscn   # attendu : code 0, 57/57
+$G --headless --path . res://scenes/tests/input_test_runner.tscn   # attendu : code 0, 74/74 (57 + 17 manette)
 ```
 
 Manuel, sur machine réelle : lancer `scenes/tests/input_test.tscn` (F6) et
@@ -293,6 +293,25 @@ Manuel, sur machine réelle : `kitchen_instinct.tscn`, puis
 | `kitchen_threat.tscn` | aucune lumière, confirmation en 0,8 s | ✅ automatisé |
 | Recommencer plusieurs fois | aucun indice ni lumière en double | ✅ automatisé |
 | Première capture | comprise et esquivable | ⏳ **non évalué** |
+
+## Manette
+
+Automatique, avec des événements manette simulés :
+- `input_test_runner` : 17 contrôles (sticks, zone morte, croix, RB et
+  gâchette, A/B une fois, regard intégré une fois par tick, Start, neutre
+  en pause, bascule clavier/manette) ;
+- `instinct_runner` : 7 contrôles (déplacement et caméra en jeu, focus du
+  menu de pause, croix sur les curseurs, reprise, invite [A],
+  « Recommencer » avec A).
+
+Manuel, avec une vraie manette (8BitDo en mode X-input) : ⏳ **non fait**.
+À vérifier :
+- détection au branchement ;
+- sens et sensibilité du stick droit ;
+- zones mortes (dérive au repos) ;
+- navigation dans la pause ;
+- « Recommencer » avec A ;
+- ce qui se passe si la manette est débranchée en jeu.
 
 ## Export Windows (version jouable)
 
