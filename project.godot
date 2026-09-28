@@ -1,0 +1,22 @@
+; Engine configuration file.
+; Written by hand for Godot 4.x (config_version=5).
+; The exact engine version must be recorded in docs/PROJECT_STATE.md
+; the first time the project is opened.
+
+config_version=5
+
+[application]
+
+config/name="COCKROACH"
+config/description="Prototype : aventure de survie et d'infiltration 3D à l'échelle d'un cafard."
+run/main_scene="res://scenes/boot/boot.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[physics]
+
+common/physics_ticks_per_second=60

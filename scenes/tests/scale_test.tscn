@@ -1,0 +1,88 @@
+[gd_scene load_steps=12 format=3]
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 1
+background_color = Color(0.07, 0.07, 0.09, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.45, 0.45, 0.5, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.72, 0.7, 0.64, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Mat_floor")
+size = Vector3(2, 0.02, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_floor"]
+size = Vector3(2, 0.02, 2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_furniture"]
+albedo_color = Color(0.42, 0.3, 0.2, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="Mesh_furniture"]
+material = SubResource("Mat_furniture")
+size = Vector3(0.6, 0.85, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_furniture"]
+size = Vector3(0.6, 0.85, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cockroach"]
+albedo_color = Color(0.35, 0.16, 0.08, 1)
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_cockroach"]
+material = SubResource("Mat_cockroach")
+size = Vector3(0.012, 0.006, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="Mat_scale_bar"]
+albedo_color = Color(0.9, 0.85, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_scale_bar"]
+material = SubResource("Mat_scale_bar")
+size = Vector3(0.1, 0.002, 0.003)
+
+[node name="ScaleTest" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 2, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 5.0
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("Mesh_floor")
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("Shape_floor")
+
+[node name="Furniture" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425, -0.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Furniture"]
+mesh = SubResource("Mesh_furniture")
+
+[node name="Collision" type="CollisionShape3D" parent="Furniture"]
+shape = SubResource("Shape_furniture")
+
+[node name="CockroachMarker" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.003, 0)
+mesh = SubResource("Mesh_cockroach")
+
+[node name="ScaleBar10cm" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.001, 0.03)
+mesh = SubResource("Mesh_scale_bar")
+
+[node name="FixedCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.9363, -0.0468, 0.348, 0, 0.9911, 0.1334, -0.3511, -0.1249, 0.928, 0.06, 0.035, 0.1)
+current = true
+fov = 60.0
+near = 0.001
+far = 20.0
