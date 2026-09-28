@@ -32,9 +32,21 @@ var _look_accum := Vector2.ZERO
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Refresh before PlayerMotor (-1) reads the intentions in each physics
+	# tick, so ticks that run before _process in a frame are not one frame
+	# late (measured: 1-3 ticks of drift at low frame rates otherwise).
+	process_physics_priority = -2
 
 
 func _process(_delta: float) -> void:
+	_refresh()
+
+
+func _physics_process(_delta: float) -> void:
+	_refresh()
+
+
+func _refresh() -> void:
 	if _gameplay_blocked():
 		_clear()
 		return

@@ -61,7 +61,9 @@ Ordre de mise à jour, vérifié par le test :
 | `pitch_min_deg` / `pitch_max_deg` | CameraRig | −70° / +10° | Vue plongeante utile sans retournement ; au-delà de +10°, le sol bloque la caméra de toute façon |
 | `pivot_height` | CameraRig | 0,012 m | Juste au-dessus du dos du cafard (6 mm) |
 | `desired_distance` | CameraRig | 0,12 m | Environ 4 longueurs de corps ; cible lisible, contexte visible |
-| `return_speed` | CameraRig | 0,3 m/s | Retour complet en ≈ 0,4 s, sans à-coup |
+| `return_speed` | CameraRig | 0,3 m/s | Vitesse de retour maximale |
+| `return_smoothing` | CameraRig | 0,15 s | Ajouté en tâche D : retour proportionnel à l'écart, qui filtre le bruit de mesure |
+| `return_window_ticks` | CameraRig | 10 | Ajouté en tâche D : on ne revient que vers la distance libre minimale des 10 derniers ticks |
 | `collision_mask` | CameraRig | couche 1 (décor) | La cible est sur la couche 2 **et** exclue du bras |
 | Rayon de la sphère du bras | camera_rig.tscn | 0,006 m | Voir « Imprécision des collisions » |
 | Marge du bras | camera_rig.tscn | 0,003 m | Soustraite à la distance mesurée en cas de contact |
@@ -130,6 +132,14 @@ Captures de référence (Forward+, lavapipe) :
 `docs/validation/camera/positions_4.7.2.jpg` et
 `docs/validation/camera/sweep_wall_4.7.2.jpg` (rotation de 82° le long du
 mur, la caméra se dégage progressivement).
+
+## Évolution en tâche D
+
+Avec un personnage mobile, la distance caméra « respirait » dans les
+passages : de 31,7 à 38,7 mm, avec des sauts jusqu'à 5,6 mm par tick.
+Le retour est maintenant lissé et fenêtré (voir le tableau). Le
+rapprochement reste immédiat. Résultat : au plus 0,47 mm par tick. Détails
+dans `docs/MOVEMENT.md`.
 
 ## Limites observées
 

@@ -18,6 +18,11 @@
 | D14 | Sonde de 6 mm et marge de 3 mm appliquée par le rig | Compense l'imprécision mesurée de `cast_motion` à l'échelle du mm | Actée ; à revoir si l'origine de l'imprécision est trouvée |
 | D15 | Rotation appliquée dans `_physics_process` | Le bras mesure toujours l'orientation courante | Provisoire ; à revoir si saccades constatées au-delà de 60 Hz |
 | D16 | Capture souris dans `PauseController` (`capture_mouse`) | Une seule logique de pause ; aucune reprise automatique | Actée (tâche C) |
+| D17 | Collision du joueur : cylindre vertical de 10 × 8 mm, qui ne tourne jamais | Mesuré le plus stable (47/47) ; la capsule pénètre de 2,5 mm | Actée (tâche D) |
+| D18 | `safe_margin` du joueur = 0,2 mm | 1 mm fait vibrer contre les murs ; 0,1 mm bloque le corps | Actée ; revalider à tout changement de moteur physique |
+| D19 | Marche 0,08 m/s, sprint 0,16 m/s, montée 0,1 s, arrêt 0,08 s | Valeurs de départ vérifiées ; confort à juger | Provisoire |
+| D20 | `PlayerInput` rafraîchi aussi en physique (priorité −2) | Supprime une latence dépendante de la fréquence de rendu | Actée (tâche D) |
+| D21 | Retour caméra lissé (0,15 s) et fenêtré (10 ticks) | Supprime la respiration de la caméra dans les passages | Actée (tâche D) |
 
 Vision complète : voir la direction de production (sections 1 à 12) fournie
 en début de projet ; le résumé opérationnel est le « Master Development

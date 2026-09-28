@@ -126,6 +126,33 @@ Manuel, sur machine réelle : lancer `scenes/tests/camera_test.tscn` (F6).
 | Écran à plus de 60 Hz | rotation fluide | ⏳ non testable ici |
 | Performance | 60 images/s sur la machine de référence | ⏳ non mesurée (rendu logiciel) |
 
+## Étape D — locomotion
+
+Automatique :
+
+```sh
+$G --headless --fixed-fps 60 --path . res://scenes/tests/movement_test_runner.tscn   # attendu : code 0, 47/47
+$G --headless --path . res://scenes/tests/camera_test_runner.tscn                    # C : 54/54
+$G --headless --path . res://scenes/tests/input_test_runner.tscn                     # B : 57/57
+```
+
+Manuel, sur machine réelle : lancer `scenes/tests/movement_test.tscn` (F6).
+
+| Contrôle | Attendu | Statut |
+|---|---|---|
+| Z seul, puis Maj | 0,08 puis 0,16 m/s, visuel orienté vers l'avant | ✅ simulé · ✅ X11 · ⏳ clavier physique |
+| Regarder vers le bas et avancer | même vitesse horizontale | ✅ simulé |
+| Diagonale | pas plus vite que l'axe | ✅ simulé |
+| Longer le mur, pousser dans le coin | ni vibration ni blocage | ✅ simulé · ✅ capture · ⏳ confort réel |
+| Joint de sol (bouton Joint) | aucun accroc | ✅ simulé |
+| Pente, puis PenteRaide | monte / ne monte pas | ✅ simulé · ✅ capture |
+| Bord | chute puis atterrissage | ✅ simulé · ✅ capture · ⏳ confort caméra |
+| Passage, SousMeuble | jamais bloqué, caméra sans clipping ni respiration | ✅ simulé · ✅ capture · ⏳ confort réel |
+| Échap en marche, Alt+Tab en marche | arrêt net, rien de bloqué, pas de saut | ✅ simulé · ✅ X11 · ⏳ bureau réel |
+| Tourner la caméra à l'arrêt | le cafard ne tourne pas | ✅ simulé |
+| Confort global des vitesses | à juger | ⏳ |
+| Écran à plus de 60 Hz | fluidité du suivi | ⏳ non testable ici |
+
 ## Historique
 
 | Date | Environnement | Godot | Résultat |
@@ -134,6 +161,7 @@ Manuel, sur machine réelle : lancer `scenes/tests/camera_test.tscn` (F6).
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe | 4.7.2-stable | Import et exécution OK ; ombre du repère invisible → corrigée ; capture validée |
 | 2026-09-28 | Conteneur distant, Xvfb + xdotool | 4.7.2-stable | Tâche B : 57/57 simulés, contrôles X11 OK, aucune régression du rendu |
 | 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche C : 54/54 ; défaut de dégagement près des murs → corrigé ; B 57/57 ; référence identique |
+| 2026-09-28 | Conteneur distant, Xvfb + lavapipe + xdotool | 4.7.2-stable | Tâche D : 47/47 ; marge 1 mm → 0,2 mm, latence d'entrée et respiration caméra corrigées ; B 57/57, C 54/54 ; référence identique |
 
 ## Script d'installation pour un environnement distant
 

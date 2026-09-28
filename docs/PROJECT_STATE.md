@@ -1,6 +1,6 @@
 # COCKROACH — État du projet
 
-_Dernière mise à jour : 2026-09-28 — tâche C (caméra) terminée._
+_Dernière mise à jour : 2026-09-28 — tâche D (locomotion) terminée._
 
 ## Version du moteur (fixée)
 
@@ -30,7 +30,11 @@ Voir `docs/CONTROLS.md`.
 et scène `camera_test`. Le cafard ne se déplace toujours pas. Voir
 `docs/CAMERA.md`.
 
-Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche D.
+**Étape D : terminée.** Scène Player (CharacterBody3D, cylindre de 10 × 8 mm,
+`PlayerMotor`), marche à 0,08 m/s et sprint à 0,16 m/s relatifs à la
+caméra, parcours `movement_test`. Voir `docs/MOVEMENT.md`.
+
+Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas la tâche E.
 
 ## Éléments du projet
 
@@ -50,6 +54,13 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | `scenes/tests/camera_test_runner.tscn` + `.gd` | Test automatique caméra |
 | `scenes/tests/camera_capture.tscn` + `.gd` | Captures de rendu reproductibles |
 | `docs/CAMERA.md` | Caméra : structure, réglages, imprécision des collisions, limites |
+| `scenes/player/player.tscn` + `scripts/player/player_motor.gd` | Player réutilisable et `PlayerMotor` |
+| `scenes/tests/movement_test.tscn` + `scripts/ui/movement_debug_panel.gd` | Parcours de locomotion et panneau |
+| `tools/gen_movement_test.py` | Générateur du parcours |
+| `scenes/tests/movement_test_runner.tscn` + `.gd` | Scénarios de locomotion (47) et contrôle d'indépendance au rendu |
+| `scenes/tests/movement_capture.tscn` + `.gd` | Séquences rendues |
+| `docs/MOVEMENT.md` | Locomotion : corps, mesures de collision, paramètres, limites |
+| `docs/validation/movement/sequences_4.7.2.jpg` | Captures de référence |
 | `docs/validation/camera/*.jpg` | Captures de référence caméra |
 | `docs/.gdignore` | Empêche Godot d'importer la documentation comme ressource |
 | `data/`, `assets/` | Dossiers réservés (vides, `.gitkeep`) |
@@ -68,6 +79,18 @@ Il reste des contrôles sur machine réelle (voir plus bas). Ils ne bloquent pas
 | Barre d'échelle (`ScaleBar10cm`, jaune) | 0,10 de long selon X | (0, 0,001, 0,03) |
 | Caméra fixe (`FixedCamera`) | FOV 60°, near 0,001, far 20 | (0,06, 0,035, 0,10), visée vers (0, 0,012, −0,06) |
 | Lumière (`KeyLight`) | Directionnelle, direction ≈ (0,61 ; −0,66 ; −0,45) | biais 0,02, biais normal 0,5, distance d'ombre 1,5 |
+
+## Vérifications tâche D — 2026-09-28
+
+| Type | Méthode | Résultat |
+|---|---|---|
+| Collision à petite échelle | Cylindre, capsule et sphère ; marges de 1 à 0,1 mm, sur le même parcours | Cylindre et 0,2 mm retenus ; 0,1 mm bloque le corps ; la capsule pénètre de 2,5 mm |
+| Scénarios de locomotion | `movement_test_runner` (`--fixed-fps 60`) | **47/47**, stable sur 3 exécutions ; 47/47 aussi en temps réel |
+| Validité du test | 3 défauts injectés : cap tiré de la caméra 3D, visuel suivant la caméra, accélération ×2 | Tous détectés |
+| Indépendance au rendu | 90 ticks, max_fps 20/45/120 (rendu réel) et 20/240 (headless) | 0,233332 m partout, après correction |
+| Non-régression | B 57/57 ; C 54/54 (×2) ; scène principale, capture de référence | OK ; **identique au pixel près** |
+| Événements X11 réels | Xvfb + xdotool : Z, Maj, Échap, souris, perte de focus | Marche 0,080, sprint 0,160, arrêt ; position figée en pause ; rien de bloqué après perte de focus |
+| Rendu | 5 séquences personnage + caméra | Pas de clipping ; caméra stable dans le passage |
 
 ## Vérifications tâche C — 2026-09-28
 
@@ -167,7 +190,13 @@ validation. Le renderer du projet n'a pas été modifié.
 Après correction, l'importation, l'exécution et le rendu ont été relancés :
 tous OK.
 
-## Vérifications restantes (non bloquantes pour D)
+## Vérifications restantes (non bloquantes pour E)
+
+- Tâche D, clavier/souris/écran réels : confort des vitesses (0,08 et
+  0,16 m/s), nervosité de l'accélération (0,1 s) et du freinage (0,08 s),
+  lecture de l'orientation du cafard, sensation de la caméra en entrée de
+  passage et après une chute, fluidité au-delà de 60 Hz (la caméra suit au
+  rythme physique).
 
 - Tâche C, souris physique et GPU réel : confort de la sensibilité (0,003
   rad/px), sens de rotation, absence de saut à la reprise, tremblement
@@ -189,12 +218,13 @@ tous OK.
 - Caméra fixe provisoire, sans script ; elle sera remplacée à la tâche C.
 - Pas de collision sur le repère cafard (pas de gameplay).
 - Collisions millimétriques : `cast_motion` pénètre de 2 à 4 mm (voir
-  `docs/CAMERA.md`). C'est un risque direct pour le contrôleur de la tâche D.
+  `docs/CAMERA.md`). Pour le personnage, c'est maîtrisé avec un cylindre et
+  `safe_margin` = 0,2 mm. Attention : 0,1 mm bloque le corps (voir
+  `docs/MOVEMENT.md`).
 - Le conteneur distant est éphémère. Godot et lavapipe devront être
   réinstallés à chaque nouvelle session (voir le script dans
   `docs/TEST_CHECKLIST.md`).
 
 ## Prochaine tâche
 
-Tâche **D — Movement : locomotion**. **Non commencée.** Commencer par
-mesurer l'imprécision des collisions pour un corps de 3 cm.
+Tâche **E — World : cuisine en volumes simples**. **Non commencée.**

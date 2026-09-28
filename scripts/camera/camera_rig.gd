@@ -31,8 +31,17 @@ extends Node3D
 		desired_distance = value
 		if is_node_ready():
 			_arm.spring_length = value
-## Speed at which the camera moves back out once space frees up, in m/s.
+## Maximum speed at which the camera moves back out once space frees up, in m/s.
 @export var return_speed := 0.3
+## Time constant of the return, in seconds: the camera closes a fraction
+## 1 - exp(-delta / return_smoothing) of the remaining gap per frame, capped
+## by return_speed. Large openings are recovered quickly; the few-millimetre
+## noise of the arm's measurement at this scale is filtered out.
+@export var return_smoothing := 0.15
+## Number of physics ticks the space must stay open before the camera moves
+## out into it: the return aims at the smallest free distance over this
+## window. Moving in stays immediate.
+@export_range(1, 60) var return_window_ticks := 10
 @export_flags_3d_physics var collision_mask := 1:
 	set(value):
 		collision_mask = value
@@ -44,6 +53,8 @@ var pitch := deg_to_rad(-20.0)
 var current_distance := 0.0
 
 var _snap_physics_frame := -1
+var _free_history: Array[float] = []
+var _history_frame := -1
 
 @onready var _pitch: Node3D = $Pitch
 @onready var _arm: SpringArm3D = $Pitch/SpringArm3D
@@ -74,6 +85,7 @@ func snap_to_target(new_yaw: float = NAN) -> void:
 	current_distance = 0.0
 	camera.position = Vector3.ZERO
 	_snap_physics_frame = Engine.get_physics_frames()
+	_free_history.clear()
 
 
 ## Distance the camera may use, in metres: the arm's measurement minus the
@@ -98,16 +110,26 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	var free := get_free_distance()
+	# One sample per physics step: the arm measures only then.
+	if Engine.get_physics_frames() != _history_frame:
+		_history_frame = Engine.get_physics_frames()
+		_free_history.append(free)
+		if _free_history.size() > return_window_ticks:
+			_free_history.pop_front()
 	if _snap_physics_frame >= 0:
 		# Wait for one physics step at the new position before trusting the arm.
 		if Engine.get_physics_frames() <= _snap_physics_frame:
 			return
 		_snap_physics_frame = -1
 		current_distance = free
+		_free_history.assign([free])
 	elif free < current_distance:
 		current_distance = free
 	else:
-		current_distance = move_toward(current_distance, free, return_speed * delta)
+		var gap: float = _free_history.min() - current_distance
+		var step := minf(return_speed * delta, gap * (1.0 - exp(-delta / return_smoothing)))
+		if gap > 0.0:
+			current_distance = current_distance + step if gap >= 0.0001 else current_distance + gap
 	camera.position = Vector3(0.0, 0.0, current_distance)
 
 

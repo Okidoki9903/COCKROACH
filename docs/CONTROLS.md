@@ -48,6 +48,11 @@ monde) :
 Une diagonale vaut (±0,707 ; ±0,707). Deux directions opposées s'annulent.
 La conversion en direction 3D reviendra à la tâche D.
 
+`move_vector` et `sprint_held` sont rafraîchis dans `_process` **et** au
+début de chaque tick physique (priorité −2, avant `PlayerMotor`). Sinon, les
+ticks exécutés avant `_process` dans une image lisent l'intention de l'image
+précédente (mesuré en tâche D).
+
 Pendant la pause, ou après une perte de focus, `move_vector` vaut zéro,
 `sprint_held` vaut faux, et aucun signal `interact_pressed` ou `drop_pressed`
 n'est émis. `pause_requested` reste actif, pour pouvoir reprendre.
