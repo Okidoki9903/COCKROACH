@@ -1,10 +1,2 @@
-# Godot 4
-.godot/
-/android/
-*.translation
-export.cfg
-export_credentials.cfg
-.import/
-
-# Local export output
-build/
+node_modules/
+.DS_Store

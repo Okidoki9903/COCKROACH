@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COCKROACH</title>
+  <link rel="stylesheet" href="./src/style.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <div id="hud" hidden></div>
+  <div id="title">
+    <div class="title-box">
+      <h1>COCKROACH</h1>
+      <p class="tag">3 cm. Une cuisine la nuit. Un humain qui peut rentrer à tout moment.</p>
+      <button id="play">Jouer</button>
+      <p class="hint">Souris + ZQSD/WASD, ou manette. Casque conseillé.</p>
+      <p id="loading">Chargement…</p>
+    </div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

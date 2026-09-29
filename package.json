@@ -1,0 +1,10 @@
+{
+  "name": "cockroach",
+  "private": true,
+  "type": "module",
+  "description": "COCKROACH - survie et infiltration a l echelle d un cafard, dans le navigateur (Three.js).",
+  "scripts": {
+    "serve": "npx http-server -c-1 -p 8080 .",
+    "test": "node tests/smoke.mjs"
+  }
+}
