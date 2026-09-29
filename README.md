@@ -5,8 +5,7 @@ trouve de l'eau et de la nourriture, constitue une réserve… et ne te fais
 pas écraser quand l'humain rentre.
 
 **Jouer dans le navigateur :** https://okidoki9903.github.io/COCKROACH/
-(une fois GitHub Pages activé, voir plus bas). Chrome ou Edge conseillés,
-casque recommandé.
+Chrome ou Edge conseillés, casque recommandé.
 
 ![Sortie du refuge](docs/captures/1_sortie_du_refuge.jpg)
 ![L'humain entre](docs/captures/2_humain_entre.jpg)
@@ -68,12 +67,11 @@ casque recommandé.
 
 Réglages et record sont gardés dans le navigateur.
 
-## Activer le lien de jeu (GitHub Pages, une fois)
+## Publication (GitHub Pages)
 
-Sur GitHub : **Settings → Pages → Build and deployment → Source :
-*Deploy from a branch*** puis **Branch : `claude/cockroach-concept-analysis-39jid0`,
-dossier `/ (root)`** → **Save**. Après une ou deux minutes, le jeu est en
-ligne à l'adresse ci-dessus.
+Le jeu est publié automatiquement par `.github/workflows/pages.yml` à
+chaque envoi sur la branche `claude/cockroach-concept-analysis-39jid0`
+(réglage du dépôt : **Settings → Pages → Source : GitHub Actions**).
 
 ## Technique
 
