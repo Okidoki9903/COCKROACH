@@ -8,6 +8,8 @@ $mods = Join-Path $Win64 "ue4ss\Mods"
 if (-not (Test-Path $mods)) { throw "UE4SS introuvable: $mods" }
 
 $src = Join-Path $PSScriptRoot "ue4ss\CockroachProbe"
+& python (Join-Path $PSScriptRoot "check_lua.py") (Join-Path $src "Scripts\main.lua")
+if ($LASTEXITCODE -ne 0) { throw "main.lua invalide, installation annulee" }
 $dst = Join-Path $mods "CockroachProbe"
 New-Item -ItemType Directory -Force (Join-Path $dst "Scripts") | Out-Null
 New-Item -ItemType Directory -Force (Join-Path $dst "out") | Out-Null

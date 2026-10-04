@@ -176,8 +176,7 @@ local function closeCsv()
     if csv ~= nil then csv:close() csv = nil end
     recording = false
     stopRequested = false
-    print("[CockroachProbe] STOP
-")
+    print("[CockroachProbe] STOP\n")
 end
 
 local function startRecording()
@@ -185,18 +184,15 @@ local function startRecording()
     local name = OUT_DIR .. "frames_" .. os.date("%Y%m%d_%H%M%S") .. ".csv"
     csv = io.open(name, "w")
     if csv == nil then
-        print("[CockroachProbe] impossible d'ouvrir " .. name .. " (créer le dossier out/)
-")
+        print("[CockroachProbe] impossible d'ouvrir " .. name .. " (créer le dossier out/)\n")
         return
     end
-    csv:write(HEADER, "
-")
+    csv:write(HEADER, "\n")
     t0 = os.clock()
     marker = 0
     stopRequested = false
     recording = true
-    print("[CockroachProbe] REC -> " .. name .. "
-")
+    print("[CockroachProbe] REC -> " .. name .. "\n")
     -- Tout (écriture et fermeture du fichier) se fait dans le fil du jeu.
     LoopInGameThreadAfterFrames(1, function()
         if stopRequested or not recording then
@@ -204,8 +200,7 @@ local function startRecording()
             return true -- true = arrêter la boucle
         end
         local s, e = pcall(sample)
-        if not s then print("[CockroachProbe] sample erreur: " .. tostring(e) .. "
-") end
+        if not s then print("[CockroachProbe] sample erreur: " .. tostring(e) .. "\n") end
         return false
     end)
 end
