@@ -6,10 +6,19 @@
 --   F6  démarrer / arrêter l'enregistrement CSV (frames)
 --   F7  snapshot des paramètres (spring arm, caméra, movement component) -> params_*.txt
 --   F8  marqueur d'événement dans le CSV (ex : "début montée mur") — incrémente le compteur
+--   F9  inspection : classes + propriétés du pawn, de ses composants, du controller -> inspect_*.txt
 --
--- Sorties : dossier Mods/CockroachProbe/out/
+-- Sorties : dossier <Win64>/ue4ss/Mods/CockroachProbe/out/ (à créer à l'installation)
 
-local OUT_DIR = "Mods/CockroachProbe/out/"
+-- Le dossier de travail du jeu est Binaries/Win64, pas le dossier du mod : on déduit
+-- le chemin absolu de out/ depuis l'emplacement de ce script (…/CockroachProbe/Scripts/main.lua).
+local function modDir()
+    local src = debug.getinfo(1, "S").source or ""
+    src = src:gsub("^@", ""):gsub("\\", "/")
+    local dir = src:match("^(.*)/Scripts/[^/]+$")
+    return dir or "ue4ss/Mods/CockroachProbe"
+end
+local OUT_DIR = modDir() .. "/out/"
 local SAMPLE_MS = 16 -- ~60 Hz
 
 local recording = false
@@ -68,7 +77,7 @@ local function findComponent(className, pawn)
 end
 
 local HEADER = table.concat({
-    "t", "marker",
+    "t", "game_t", "marker",
     "pawn_x,pawn_y,pawn_z",
     "pawn_pitch,pawn_yaw,pawn_roll",
     "pawn_fwd_x,pawn_fwd_y,pawn_fwd_z",
@@ -84,17 +93,36 @@ local HEADER = table.concat({
     "move_mode",
 }, ",")
 
+-- Cache : FindAllOf à 60 Hz coûte cher ; on ne recherche que si le pawn change.
+local cache = { pawnName = nil }
+
+local function refreshCache(pc, pawn)
+    local n = pawn:GetFullName()
+    if cache.pawnName == n and ok(cache.cm) then return end
+    cache.pawnName = n
+    cache.cm = try(function() return pc.PlayerCameraManager end)
+    cache.arm = findComponent("SpringArmComponent", pawn)
+    cache.move = try(function() return pawn.CharacterMovement end)
+    cache.world = try(function() return pawn:GetWorld() end)
+    cache.gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+end
+
+local function gameTime()
+    if not ok(cache.gs) or not ok(cache.world) then return -1 end
+    return try(function() return cache.gs:GetTimeSeconds(cache.world) end, -1)
+end
+
 local function sample()
     local pc = getPC()
     if pc == nil then return end
     local pawn = getPawn(pc)
     if pawn == nil then return end
-    local cm = try(function() return pc.PlayerCameraManager end)
-    local arm = findComponent("SpringArmComponent", pawn)
-    local move = try(function() return pawn.CharacterMovement end)
+    refreshCache(pc, pawn)
+    local cm, arm, move = cache.cm, cache.arm, cache.move
 
     local line = table.concat({
         string.format("%.4f", os.clock() - t0),
+        string.format("%.4f", gameTime()),
         tostring(marker),
         vec(try(function() return pawn:K2_GetActorLocation() end)),
         rot(try(function() return pawn:K2_GetActorRotation() end)),
@@ -210,6 +238,97 @@ local function snapshot()
     print("[CockroachProbe] snapshot -> " .. name .. "\n")
 end
 
+-- F9 : inspection par réflexion. Pour le pawn, ses composants, le controller et le camera
+-- manager : chaîne de classes + toutes les propriétés (nom, type, valeur). Sert à trouver
+-- les classes custom (mouvement mural, caméra) et le nom de leurs vrais paramètres.
+local function className(o)
+    return try(function() return o:GetClass():GetFName():ToString() end, "?")
+end
+
+local function classChain(o)
+    local names = {}
+    local c = try(function() return o:GetClass() end)
+    while c ~= nil and try(function() return c:IsValid() end, false) do
+        names[#names + 1] = try(function() return c:GetFullName() end, "?")
+        c = try(function() return c:GetSuperStruct() end)
+    end
+    return table.concat(names, "\n#   <- ")
+end
+
+local function dumpProps(f, o)
+    local c = try(function() return o:GetClass() end)
+    while c ~= nil and try(function() return c:IsValid() end, false) do
+        local cname = try(function() return c:GetFName():ToString() end, "?")
+        try(function()
+            c:ForEachProperty(function(prop)
+                local pname = prop:GetFName():ToString()
+                local ptype = try(function() return prop:GetClass():GetFName():ToString() end, "?")
+                local val = ""
+                if ptype:match("Float") or ptype:match("Double") or ptype:match("Int") or ptype:match("Bool")
+                    or ptype:match("Byte") or ptype:match("Enum") or ptype:match("Struct") or ptype:match("Name") then
+                    val = fmt(try(function() return o[pname] end))
+                elseif ptype:match("Object") then
+                    local v = try(function() return o[pname] end)
+                    val = (v ~= nil and try(function() return v:IsValid() end, false)) and v:GetFullName() or "None"
+                end
+                f:write(string.format("  %-22s %-40s %-26s = %s\n", cname, pname, ptype, val))
+            end)
+        end)
+        c = try(function() return c:GetSuperStruct() end)
+        -- On s'arrête aux classes de base sans intérêt.
+        local n = c and try(function() return c:GetFName():ToString() end, "") or ""
+        if n == "Object" or n == "Actor" or n == "ActorComponent" then break end
+    end
+end
+
+local function inspectObj(f, label, o)
+    f:write("\n==== ", label, " : ", ok(o) and o:GetFullName() or "(introuvable)", "\n")
+    if not ok(o) then return end
+    f:write("# ", classChain(o), "\n")
+    dumpProps(f, o)
+end
+
+local function inspect()
+    local pc = getPC()
+    local pawn = pc and getPawn(pc) or nil
+    local name = OUT_DIR .. "inspect_" .. os.date("%Y%m%d_%H%M%S") .. ".txt"
+    local f = io.open(name, "w")
+    if f == nil then
+        print("[CockroachProbe] impossible d'ouvrir " .. name .. "\n")
+        return
+    end
+    inspectObj(f, "PlayerController", pc)
+    inspectObj(f, "PlayerCameraManager", pc and try(function() return pc.PlayerCameraManager end) or nil)
+    inspectObj(f, "Pawn", pawn)
+    if pawn ~= nil then
+        local acClass = StaticFindObject("/Script/Engine.ActorComponent")
+        local comps = try(function() return pawn:K2_GetComponentsByClass(acClass) end)
+        if comps ~= nil then
+            local list = {}
+            try(function() comps:ForEach(function(_, e) list[#list + 1] = e:get() end) end)
+            if #list == 0 then
+                try(function() for _, e in ipairs(comps) do list[#list + 1] = e end end)
+            end
+            f:write("\n# Composants du pawn : ", #list, "\n")
+            for _, comp in ipairs(list) do
+                f:write("#   ", className(comp), "  ", ok(comp) and comp:GetFullName() or "?", "\n")
+            end
+            for _, comp in ipairs(list) do
+                inspectObj(f, "Component " .. className(comp), comp)
+            end
+        end
+    end
+    f:close()
+    print("[CockroachProbe] inspect -> " .. name .. "\n")
+end
+
+RegisterKeyBind(Key.F9, function()
+    ExecuteInGameThread(function()
+        local s, e = pcall(inspect)
+        if not s then print("[CockroachProbe] inspect erreur: " .. tostring(e) .. "\n") end
+    end)
+end)
+
 RegisterKeyBind(Key.F6, function()
     if recording then stopRecording() else startRecording() end
 end)
@@ -223,4 +342,4 @@ RegisterKeyBind(Key.F8, function()
     print("[CockroachProbe] marker " .. marker .. "\n")
 end)
 
-print("[CockroachProbe] chargé. F6=REC  F7=snapshot  F8=marker\n")
+print("[CockroachProbe] chargé. F6=REC  F7=snapshot  F8=marker  F9=inspect  out=" .. OUT_DIR .. "\n")

@@ -34,20 +34,29 @@ Pas besoin de Cheat Engine/x64dbg pour les phases 1-4 avec UE4SS.
 
 ## Phases 2-4 — Mesures caméra & mouvement
 
-Installer le mod :
+Installer le mod (copie, crée `out/`, active dans `mods.txt` **et** `mods.json`) :
 
 ```
-<Projet>/Binaries/Win64/ue4ss/Mods/CockroachProbe/Scripts/main.lua   ← copier depuis reverse/ue4ss/
-<Projet>/Binaries/Win64/ue4ss/Mods/CockroachProbe/out/               ← créer ce dossier vide
+powershell -ExecutionPolicy Bypass -File reverse\install_probe.ps1
 ```
 
-et ajouter `CockroachProbe : 1` dans `ue4ss/Mods/mods.txt`.
+Structure UE4SS 3.x (experimental) — tout est sous `Binaries/Win64/ue4ss/` :
+
+```
+<Projet>/Binaries/Win64/dwmapi.dll
+<Projet>/Binaries/Win64/ue4ss/UE4SS-settings.ini
+<Projet>/Binaries/Win64/ue4ss/Mods/mods.txt + mods.json
+<Projet>/Binaries/Win64/ue4ss/Mods/CockroachProbe/Scripts/main.lua
+<Projet>/Binaries/Win64/ue4ss/Mods/CockroachProbe/out/      <- sorties (chemin absolu calculé par le script)
+```
 
 En jeu :
 
 - **F7** — snapshot des paramètres (longueur spring arm, offsets, lag, FOV, vitesses, rayon capsule…).
 - **F6** — démarrer/arrêter l'enregistrement image par image (~60 Hz).
 - **F8** — marqueur : appuyer à chaque changement de situation, pour découper le CSV.
+- **F9** — inspection : classes + toutes les propriétés du pawn, de ses composants, du controller
+  et du camera manager → `inspect_*.txt` (brut, à garder dans `reverse/_private/`, jamais commité).
 
 Protocole d'enregistrement (un seul fichier, un **F8** entre chaque cas) :
 

@@ -1,3 +1,11 @@
 # Sorties brutes du mod (copier les mesures utiles dans reverse/data/)
 reverse/ue4ss/CockroachProbe/out/
 __pycache__/
+
+# Fichiers issus du jeu (dumps UE4SS : headers, objets, inspections brutes) — JAMAIS commités.
+# On les range dans reverse/_private/ pour les analyser localement.
+reverse/_private/
+CXXHeaderDump/
+UHTHeaderDump/
+ObjectDump*.txt
+*.usmap
