@@ -46,7 +46,8 @@ pub struct Contact {
     pub weight: f32,
 }
 
-const STICK_DEADZONE: f32 = 0.1;
+/// Zone morte circulaire du stick, avec remise à l'échelle (les manettes dérivent souvent de 0,1-0,2).
+pub const STICK_DEADZONE: f32 = 0.2;
 /// Anneaux de sonde : (angle depuis -up en degrés, nombre de rayons). 1 + 8 + 12 + 11 = 32 (CastSamples).
 const PROBE_RINGS: [(f32, usize); 4] = [(0.0, 1), (35.0, 8), (70.0, 12), (100.0, 11)];
 
@@ -393,10 +394,11 @@ pub fn target_normal(contacts: &[Contact]) -> Option<Vec3> {
 /// poussé (franchissement d'arêtes sans demi-tour), sinon pour pointer vers le haut / le fond de l'écran.
 /// Retourne (direction unitaire, avant écran retenu, intensité 0..1).
 pub fn wish_direction(input: &MoveInput, up: Vec3, previous: Option<Vec3>) -> Option<(Vec3, Vec3, f32)> {
-    let m = input.stick.length().min(1.0);
-    if m < STICK_DEADZONE {
+    let raw = input.stick.length().min(1.0);
+    if raw < STICK_DEADZONE {
         return None;
     }
+    let m = (raw - STICK_DEADZONE) / (1.0 - STICK_DEADZONE);
     let cam_right = input.cam_forward.cross(input.cam_up).normalize_or_zero();
     let mut screen_fwd = up
         .cross(cam_right)

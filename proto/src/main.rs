@@ -24,6 +24,7 @@ use cockroach_proto::walker::{Mode, MoveInput, Walker};
 const ROACH_RADIUS: f32 = 1.0;
 const SPAWN: Vec3 = Vec3::new(0.0, ROACH_RADIUS, 40.0);
 const MOUSE_SENSITIVITY: f32 = 0.0025; // rad / pixel
+const LOOK_DEADZONE: f32 = 0.15;
 
 fn main() {
     App::new()
@@ -303,7 +304,9 @@ fn read_input(
     input.mouse = if captured { Vec2::new(d.x, -d.y) * MOUSE_SENSITIVITY } else { Vec2::ZERO };
 
     input.stick = stick.clamp_length_max(1.0);
-    input.look = look.clamp_length_max(1.0);
+    // zone morte du stick caméra (dérive), avec remise à l'échelle
+    let l = look.length().min(1.0);
+    input.look = if l < LOOK_DEADZONE { Vec2::ZERO } else { look / look.length() * (l - LOOK_DEADZONE) / (1.0 - LOOK_DEADZONE) };
     input.run = run;
     input.jump = jump;
     input.cycle_arm = cycle_arm;
@@ -397,14 +400,14 @@ fn update_hud(
     let arm = t.arm_lengths[player.rig.arm_index];
     let fps = if time.delta_secs() > 0.0 { 1.0 / time.delta_secs() } else { 0.0 };
     hud.0 = format!(
-        "COCKROACH — prototype   ({fps:.0} i/s)\n\
-         État : {:?}   vitesse : {speed:.1} cm/s ({:.1} corps/s)\n\
-         Surface : {surface_name} ({surface:.0}°)   endurance : {:.0} %\n\
-         Caméra : bras {arm:.1} cm   pitch {:.0}°\n\
+        "COCKROACH - prototype   ({fps:.0} i/s)\n\
+         Etat : {:?}   vitesse : {speed:.1} cm/s ({:.1} corps/s)\n\
+         Surface : {surface_name} ({surface:.0} deg)   endurance : {:.0} %\n\
+         Camera : bras {arm:.1} cm   pitch {:.0} deg\n\
          \n\
-         Manette : stick G marcher · stick D caméra · B courir · Y sauter · clic stick G distance\n\
-         Clavier : ZQSD/WASD · souris (clic) · Maj courir · Espace sauter · Tab distance\n\
-         F1 debug sondes · R replacer",
+         Manette : stick G marcher | stick D camera | B courir | Y sauter | clic stick G distance\n\
+         Clavier : ZQSD/WASD | souris (clic) | Maj courir | Espace sauter | Tab distance\n\
+         F1 debug sondes | R replacer",
         w.mode,
         speed / t.body_radius,
         w.stamina * 100.0,

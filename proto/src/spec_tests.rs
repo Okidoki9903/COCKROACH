@@ -70,9 +70,13 @@ fn walk_speed_proportional_to_stick() {
     let t = Tuning::ant();
     let q = floor();
     let mut w = Walker::new(Vec3::new(0.0, 14.0, 0.0), Vec3::X);
-    let s = simulate(&mut w, input(Vec2::new(0.0, 0.5)), &q, &t, 1.0, 0.0);
+    // vitesse ∝ inclinaison au-delà de la zone morte (remise à l'échelle)
+    let s = simulate(&mut w, input(Vec2::new(0.0, 0.6)), &q, &t, 1.0, 0.0);
     let v = speed_between(&s, 30, 59);
-    assert!((v - 90.0).abs() < 1.0, "vitesse demi-stick {v}");
+    assert!((v - 90.0).abs() < 1.0, "vitesse stick 0,6 → mi-vitesse : {v}");
+    let mut w = Walker::new(Vec3::new(0.0, 14.0, 0.0), Vec3::X);
+    let s = simulate(&mut w, input(Vec2::new(0.0, 0.15)), &q, &t, 0.5, 0.0);
+    assert!(s.last().unwrap().pos.distance(Vec3::new(0.0, 14.0, 0.0)) < 1e-3, "dérive du stick ignorée");
 }
 
 #[test]
@@ -107,7 +111,7 @@ fn floor_to_wall_transition_takes_about_0_2_s() {
     let q = floor_and_wall();
     let mut w = Walker::new(Vec3::new(200.0, 14.0, 0.0), Vec3::X);
     // ~100 u/s comme dans la mesure (cas 5)
-    let s = simulate(&mut w, input(Vec2::new(0.0, 100.0 / 180.0)), &q, &t, 3.0, 0.0);
+    let s = simulate(&mut w, input(Vec2::new(0.0, 0.2 + 0.8 * 100.0 / 180.0)), &q, &t, 3.0, 0.0);
     let t10 = s.iter().find(|x| up_angle_deg(x.up, Vec3::Y) >= 10.0).expect("ne bascule jamais").t;
     let t80 = s.iter().find(|x| up_angle_deg(x.up, Vec3::Y) >= 80.0).expect("n'atteint jamais le mur").t;
     let dur = t80 - t10;
@@ -146,7 +150,7 @@ fn convex_edge_wraps_onto_side_face() {
     // dessus de table à y = 200, arête à x = 200, face latérale normale +X
     let q = floor().with(Vec3::new(0.0, 100.0, 0.0), Vec3::new(400.0, 200.0, 400.0));
     let mut w = Walker::new(Vec3::new(150.0, 214.0, 0.0), Vec3::X);
-    let s = simulate(&mut w, input(Vec2::new(0.0, 100.0 / 180.0)), &q, &t, 2.0, 0.0);
+    let s = simulate(&mut w, input(Vec2::new(0.0, 0.2 + 0.8 * 100.0 / 180.0)), &q, &t, 2.0, 0.0);
     assert!(s.iter().all(|x| x.grounded), "ne doit pas tomber de l'arête");
     let last = s.last().unwrap();
     assert!(up_angle_deg(last.up, Vec3::X) < 20.0, "s'enroule sur la face : up {:?}", last.up);
