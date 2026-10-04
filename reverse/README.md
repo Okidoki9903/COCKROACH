@@ -89,3 +89,19 @@ et la liste des classes custom. J'en tire `docs/specs/camera.md` et `docs/specs/
 Note : si le mouvement mural est fait par un composant custom (probable), les noms de propriétés
 ne seront pas ceux d'UE standard — `GetGravityDirection` et `CharacterMovement` renverront `nan`/`-1`.
 C'est normal ; les vecteurs `pawn_up` restent fiables et suffisent pour reconstruire l'algorithme.
+
+## État (4 octobre 2026) — session réalisée
+
+- Jeu : Empire of the Ants, **UE 5.4** (confirmé par UE4SS), `Empire/Binaries/Win64`. UE4SS experimental
+  `v3.0.1-1152-ge3ba1016`.
+- Classes trouvées (module `/Script/Empire`) : `APlayerPawn` (BP_PlayerPawn), `UPlayerMovementController`
+  (PawnMovementComponent custom) + DataAsset `UPlayerMovementData`, `UPlayerCameraController`
+  (caméra « leash »), `UCineCameraComponent`. Le mod les lit (F7) et les enregistre (F6).
+- Pièges rencontrés : `LoopAsync` + `ExecuteInGameThread` à 60 Hz **fait planter le jeu** → échantillonnage avec
+  `LoopInGameThreadAfterFrames(1, …)`, arrêté par `CancelDelayedAction(handle)` (`return true` ne suffit pas
+  dans cette version). Les rotations (`FRotator`) reviennent en `nan` → on enregistre les vecteurs avant/haut.
+  `GetVelocity()` reste à 0 (mouvement custom) → vitesse dérivée de la position.
+- Mesures : `reverse/data/` (c1 à c6 + `params_baseline.txt` + `NOTES.md`).
+- Analyse : `python reverse/analysis/analyze_frames.py <csv> [--timeline|--extras]`, `reverse/analysis/fit_leash.py`.
+- Specs : **`docs/specs/camera.md`**, **`docs/specs/surface-movement.md`**.
+- Avant d'installer le mod : `pip install lupa` (vérification de syntaxe Lua automatique dans `install_probe.ps1`).
