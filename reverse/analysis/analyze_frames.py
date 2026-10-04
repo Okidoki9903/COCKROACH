@@ -5,6 +5,9 @@ Usage :
   python analyze_frames.py frames.csv              résumé par segment (marqueur F8 + état de mouvement)
   python analyze_frames.py frames.csv --timeline   une ligne toutes les ~0.15 s (lecture rapide)
   python analyze_frames.py frames.csv --every N    idem, une ligne toutes les N images
+  python analyze_frames.py frames.csv --extras     + gravité (chutes), vitesses de rotation caméra
+                                                    (image par image), bascule de l'up, direction
+                                                    du mouvement vue à l'écran sur les parois
 
 Grandeurs (unités UE : 1 u = 1 cm, angles en degrés) :
   - vitesse réelle du pawn (FrameVelocity si dispo, sinon dérivée de la position)
@@ -297,6 +300,101 @@ def report(path, rows):
             print(f"  arrêt à t={t - rows[0]['t']:.2f}s : fit impossible (excès max {peak})")
 
 
+# ---------------------------------------------------------------- analyses complémentaires
+def cross(a, b):
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+
+
+def fit_quadratic_accel(ts, zs):
+    """Moindres carrés z = a + b t + c t² ; retourne 2c (accélération)."""
+    n = len(ts)
+    s = [sum(t ** p for t in ts) for p in range(5)]
+    y = [sum(z * t ** p for t, z in zip(ts, zs)) for p in range(3)]
+    m = [[n, s[1], s[2]], [s[1], s[2], s[3]], [s[2], s[3], s[4]]]
+
+    def det(a):
+        return (a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1])
+                - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0])
+                + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]))
+    d = det(m)
+    if abs(d) < 1e-12:
+        return None
+    mc = [[m[i][0], m[i][1], y[i]] for i in range(3)]
+    return 2 * det(mc) / d
+
+
+def extras(rows):
+    t0 = rows[0]["t"]
+    print("\n## Gravité (segments Jump/Fall, fit z(t) quadratique)")
+    for seg in segments_by(rows, lambda r: r["mode"]):
+        if seg[0]["mode"] not in (3, 5) or len(seg) < 8:
+            continue
+        ts = [r["t"] - seg[0]["t"] for r in seg]
+        acc = fit_quadratic_accel(ts, [r["pawn"][2] for r in seg])
+        vh = [math.hypot(b["pawn"][0] - a["pawn"][0], b["pawn"][1] - a["pawn"][1]) / (b["t"] - a["t"])
+              for a, b in zip(seg, seg[1:]) if b["t"] > a["t"]]
+        damp = (vh[0] - vh[-1]) / ts[-1] if ts[-1] > 0 else 0
+        print(f"  {MODES[seg[0]['mode']]:<4} t={seg[0]['t'] - t0:6.2f} durée={ts[-1]:.2f}s  accel_z={acc:8.1f} u/s²  "
+              f"v_horiz {vh[0]:.0f}→{vh[-1]:.0f} (≈{damp:.0f} u/s² de freinage)")
+
+    print("\n## Rotation caméra : vitesse angulaire (norme yaw+pitch) quand elle tourne")
+    rates = []
+    for a, b in zip(rows, rows[1:]):
+        dt = b["t"] - a["t"]
+        if dt <= 0 or not a["cam_fwd"] or not b["cam_fwd"]:
+            continue
+        dy = wrap180(yaw_deg(b["cam_fwd"]) - yaw_deg(a["cam_fwd"])) / dt
+        dp = (pitch_deg(b["cam_fwd"]) - pitch_deg(a["cam_fwd"])) / dt
+        w = math.hypot(dy, dp)
+        if w > 5:
+            rates.append(w)
+    if rates:
+        rates.sort()
+        print(f"  {len(rates)} images en rotation ; médiane {median(rates):.1f} °/s ; p90 {rates[int(0.9 * len(rates))]:.1f} °/s ; "
+              f"max {rates[-1]:.1f} °/s")
+        pitches = [pitch_deg(r["cam_fwd"]) for r in rows if r["cam_fwd"]]
+        print(f"  pitch caméra min {min(pitches):.1f}° / max {max(pitches):.1f}°")
+    else:
+        print("  (pas de rotation)")
+
+    print("\n## Bascule de l'up du pawn (images où il tourne de plus de 30 °/s)")
+    ur = [r for r in angular_rate(rows, "up", angle_deg) if r > 30]
+    if ur:
+        ur.sort()
+        print(f"  {len(ur)} images ; médiane {median(ur):.0f} °/s ; p90 {ur[int(0.9 * len(ur))]:.0f} °/s ; max {ur[-1]:.0f} °/s")
+        per_u = []
+        for a, b in zip(rows, rows[1:]):
+            dist = norm(sub(b["pawn"], a["pawn"]))
+            ang = angle_deg(a["up"], b["up"])
+            if dist > 0.5 and ang and ang > 1:
+                per_u.append(ang / dist)
+        if per_u:
+            print(f"  angle par unité parcourue (médiane) : {median(per_u):.2f} °/u → rayon d'arc ≈ "
+                  f"{180 / math.pi / median(per_u):.1f} u")
+
+    print("\n## Direction du mouvement à l'écran sur les parois (fenêtres de 0,5 s, surface > 55°)")
+    i = 0
+    while i < len(rows):
+        j = i
+        while j < len(rows) and rows[j]["t"] - rows[i]["t"] < 0.5:
+            j += 1
+        s, i = rows[i:j], j
+        if len(s) < 3:
+            continue
+        r = s[len(s) // 2]
+        if r["up_angle"] < 55 or r["mode"] != 1 or not r["cam_fwd"]:
+            continue
+        d = sub(s[-1]["pawn"], s[0]["pawn"])
+        v = norm(d) / (s[-1]["t"] - s[0]["t"])
+        if v < 20:
+            continue
+        u = unit(d)
+        cf, cu = r["cam_fwd"], r["cam_up"]
+        cr = unit(cross(cu, cf))
+        print(f"  t={r['t'] - t0:6.2f} surf={r['up_angle']:5.1f}° v={v:6.1f}  écran: droite={dot(u, cr):+.2f} "
+              f"haut={dot(u, cu):+.2f}  avant_pawn·dir={dot(r['fwd'], u):+.2f}  cam_fwd·normale={dot(cf, r['up']):+.2f}")
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -318,6 +416,8 @@ def main():
         timeline(rows, every)
     else:
         report(path, rows)
+        if "--extras" in sys.argv:
+            extras(rows)
 
 
 if __name__ == "__main__":
