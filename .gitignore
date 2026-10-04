@@ -9,3 +9,6 @@ CXXHeaderDump/
 UHTHeaderDump/
 ObjectDump*.txt
 *.usmap
+
+# Prototype Rust
+proto/target/

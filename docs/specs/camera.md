@@ -91,7 +91,7 @@ if d > L:  F = T - e/d * L
 | A (gain de rappel) | **2,6** (u^(1−P)/s) | M (ajustement, `reverse/analysis/fit_leash.py`) |
 | P (exposant) | **1,2** | M (fit direct à l'arrêt : 1,29-1,36 ; fit global : 1,2) |
 | L_walk (laisse marche / repos) | **25-30 u** (1,8-2,1 R) | M (fit 25), P `BaseLeashLength=30` |
-| L_run (laisse course) | **≥ 70 u**, valeur jeu 100 u (7,1 R) | P `RunLeashLength=100`, M (excès max observé 73 u) |
+| L_run (laisse course) | **75 u** recommandé (5,4 R) ; valeur jeu 100 u | P `RunLeashLength=100`, M (excès max observé 73 u ; le prototype atteint 94 u avec 100) |
 | L_aim (laisse visée) | 15 u | P `AimLeashLength` |
 
 Vitesse de rappel équivalente : `v_rappel(d) = 2,6·d^1,2` → 6 u/s à d = 2, 46 u/s à d = 11, 125 u/s à d = 25,

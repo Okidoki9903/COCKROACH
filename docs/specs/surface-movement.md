@@ -104,19 +104,28 @@ arêtes vives). Sur terrain irrégulier, l'up bouge en permanence (médiane 221 
 ## 4. Contrôle : du stick à la direction sur la surface
 
 ```
-// stick gauche m = (mx, my), |m| ≤ 1 (deadzone circulaire)
-right_s = normalize(project_on_plane(cam_right, up))
-fwd_s   = normalize(project_on_plane(cam_forward + cam_up, up))   // robuste pour toutes orientations
-wish    = normalize(right_s * mx + fwd_s * my)                     // direction tangente
-speed   = running ? run_speed_current : WalkSpeed * |m|           // marche ∝ inclinaison
-velocity = wish * speed                                            // marche : sans inertie
+// stick gauche m = (mx, my), |m| ≤ 1 (deadzone circulaire 0,1)
+cam_right  = cam_forward × cam_up
+screen_fwd = normalize(up × cam_right)        // tangente dont la projection écran est verticale
+if |up × cam_right| < 0,1:                    // surface vue de profil (normale ≈ droite caméra)
+    screen_fwd = normalize(project_on_plane(cam_forward + cam_up, up))
+// signe : continuité tant que le stick reste poussé, sinon « vers le haut / le fond de l'écran »
+if stick_tenu_image_precedente: if dot(screen_fwd, screen_fwd_prec) < 0: screen_fwd = -screen_fwd
+else:                           if dot(screen_fwd, cam_up + cam_forward) < 0: screen_fwd = -screen_fwd
+screen_right = screen_fwd × up
+wish     = normalize(screen_right * mx + screen_fwd * my)   // direction tangente
+speed    = running ? run_speed_current : WalkSpeed * |m|    // marche ∝ inclinaison
+velocity = wish * speed                                     // marche : sans inertie
 ```
 
-Pourquoi `cam_forward + cam_up` : au sol, `cam_forward` projeté donne « devant » ; sur un mur face caméra,
-`cam_forward` est presque normal au mur (projection nulle) mais `cam_up` projeté donne « haut du mur ».
-Au plafond, avec une caméra horizontale, `cam_forward` projeté donne « devant ». La somme ne s'annule dans
-aucun de ces cas. Ça reproduit ce qu'on a mesuré : sur paroi, stick haut → déplacement écran-haut avec un
-alignement de +0,88 à +1,00 ; stick bas → −0,86 à −0,99 ; côtés → droite/gauche écran ±0,9 (M, cas 6).
+Pourquoi cette forme : au sol, `up × cam_right` = avant caméra projeté ; sur un mur face caméra, c'est le
+« haut du mur » ; au plafond, c'est « devant » (après le choix du signe). La continuité du signe évite que
+l'insecte fasse demi-tour en franchissant une arête convexe en gardant le stick poussé : il passe l'arête et
+descend l'autre face. Une première version, `project(cam_forward + cam_up)`, s'annulait sur les faces
+inclinées à 45° vers l'arrière, ce que le prototype a révélé (I). La forme retenue reproduit ce qu'on a
+mesuré : sur paroi, stick haut → déplacement écran-haut avec un alignement de +0,88 à +1,00 ; stick bas →
+−0,86 à −0,99 ; côtés → droite/gauche écran ±0,9, y compris sur les faces tournées à l'opposé de la caméra
+lors d'un nouvel appui (M, cas 6).
 
 Orientation du corps :
 ```
