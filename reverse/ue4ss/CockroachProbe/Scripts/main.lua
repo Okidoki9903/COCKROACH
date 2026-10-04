@@ -172,11 +172,20 @@ local function sample()
     csv:write(line, "\n")
 end
 
+local loopHandle = nil
+local recGen = 0 -- numéro d'enregistrement : une vieille boucle survivante ne doit rien faire
+
 local function closeCsv()
+    local wasOpen = csv ~= nil
     if csv ~= nil then csv:close() csv = nil end
     recording = false
     stopRequested = false
-    print("[CockroachProbe] STOP\n")
+    -- Dans cette version d'UE4SS, "return true" n'arrête pas la boucle : on l'annule par son handle.
+    if loopHandle ~= nil then
+        pcall(CancelDelayedAction, loopHandle)
+        loopHandle = nil
+    end
+    if wasOpen then print("[CockroachProbe] STOP" .. string.char(10)) end
 end
 
 local function startRecording()
@@ -194,7 +203,10 @@ local function startRecording()
     recording = true
     print("[CockroachProbe] REC -> " .. name .. "\n")
     -- Tout (écriture et fermeture du fichier) se fait dans le fil du jeu.
-    LoopInGameThreadAfterFrames(1, function()
+    recGen = recGen + 1
+    local myGen = recGen
+    loopHandle = LoopInGameThreadAfterFrames(1, function()
+        if myGen ~= recGen then return true end
         if stopRequested or not recording then
             closeCsv()
             return true -- true = arrêter la boucle
