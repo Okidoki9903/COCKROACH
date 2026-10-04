@@ -26,9 +26,11 @@ local function modDir()
     return dir or "ue4ss/Mods/CockroachProbe"
 end
 local OUT_DIR = modDir() .. "/out/"
-local SAMPLE_MS = 16 -- ~60 Hz
+-- Échantillonnage : une fois par image, dans le fil du jeu (LoopInGameThreadAfterFrames).
+-- L'ancienne version (LoopAsync + ExecuteInGameThread à 60 Hz) faisait planter le jeu.
 
 local recording = false
+local stopRequested = false
 local csv = nil
 local marker = 0
 local t0 = os.clock()
@@ -120,6 +122,8 @@ local HEADER = table.concat({
     "fvel_x,fvel_y,fvel_z",
     "cam_x,cam_y,cam_z",
     "cam_pitch,cam_yaw,cam_roll",
+    "cam_fwd_x,cam_fwd_y,cam_fwd_z",
+    "cam_up_x,cam_up_y,cam_up_z",
     "fov",
     "ctrl_pitch,ctrl_yaw,ctrl_roll",
     "camctrl_x,camctrl_y,camctrl_z",
@@ -131,8 +135,9 @@ local HEADER = table.concat({
 }, ",")
 
 local function sample()
-    local pc = getPC()
+    local pc = ok(cache.pc) and cache.pc or getPC()
     if pc == nil then return end
+    cache.pc = pc
     local pawn = getPawn(pc)
     if pawn == nil then return end
     refreshCache(pc, pawn)
@@ -151,6 +156,8 @@ local function sample()
         vec(ok(move) and try(function() return move:GetFrameVelocity() end) or nil),
         vec(ok(cm) and try(function() return cm:GetCameraLocation() end) or nil),
         rot(ok(cm) and try(function() return cm:GetCameraRotation() end) or nil),
+        vec(ok(cine) and try(function() return cine:GetForwardVector() end) or nil),
+        vec(ok(cine) and try(function() return cine:GetUpVector() end) or nil),
         num(ok(cm) and try(function() return cm:GetFOVAngle() end) or nil, "%.3f"),
         rot(try(function() return pc:GetControlRotation() end)),
         vec(compLoc(cache.camCtrl)),
@@ -165,31 +172,46 @@ local function sample()
     csv:write(line, "\n")
 end
 
+local function closeCsv()
+    if csv ~= nil then csv:close() csv = nil end
+    recording = false
+    stopRequested = false
+    print("[CockroachProbe] STOP
+")
+end
+
 local function startRecording()
+    if recording then return end
     local name = OUT_DIR .. "frames_" .. os.date("%Y%m%d_%H%M%S") .. ".csv"
     csv = io.open(name, "w")
     if csv == nil then
-        print("[CockroachProbe] impossible d'ouvrir " .. name .. " (créer le dossier out/)\n")
+        print("[CockroachProbe] impossible d'ouvrir " .. name .. " (créer le dossier out/)
+")
         return
     end
-    csv:write(HEADER, "\n")
+    csv:write(HEADER, "
+")
     t0 = os.clock()
     marker = 0
+    stopRequested = false
     recording = true
-    print("[CockroachProbe] REC -> " .. name .. "\n")
-    LoopAsync(SAMPLE_MS, function()
-        if not recording then return true end -- true = arrêter la boucle
-        ExecuteInGameThread(function()
-            if recording and csv ~= nil then pcall(sample) end
-        end)
+    print("[CockroachProbe] REC -> " .. name .. "
+")
+    -- Tout (écriture et fermeture du fichier) se fait dans le fil du jeu.
+    LoopInGameThreadAfterFrames(1, function()
+        if stopRequested or not recording then
+            closeCsv()
+            return true -- true = arrêter la boucle
+        end
+        local s, e = pcall(sample)
+        if not s then print("[CockroachProbe] sample erreur: " .. tostring(e) .. "
+") end
         return false
     end)
 end
 
 local function stopRecording()
-    recording = false
-    if csv ~= nil then csv:close() csv = nil end
-    print("[CockroachProbe] STOP\n")
+    stopRequested = true -- la boucle du fil du jeu fermera le fichier
 end
 
 local function fmt(v)
@@ -303,7 +325,11 @@ local function guarded(label, fn)
 end
 
 RegisterKeyBind(Key.F6, function()
-    if recording then stopRecording() else startRecording() end
+    if recording then
+        stopRecording()
+    else
+        ExecuteInGameThread(function() pcall(startRecording) end)
+    end
 end)
 
 RegisterKeyBind(Key.F7, guarded("snapshot", snapshot))
