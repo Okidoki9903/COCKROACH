@@ -17,8 +17,13 @@ La première compilation prend plusieurs minutes (Bevy). Les suivantes sont rapi
 Sortir du refuge (sous le meuble bas) → explorer → sentir le danger → fuir → se cacher → prendre une miette
 → la rapporter au refuge.
 
-- **Objectif** : rapporter 10 miettes. Il y en a 5 à la fois : au sol, sur la table, sur le plan de travail,
-  sur le frigo, sur les livres, sur la boîte de conserve. Le cafard est ralenti (×0,8) quand il porte.
+- **Objectif : une colonie de 12 cafards.** Les miettes (5 à la fois : sol, table, plan de travail, frigo,
+  livres, boîte de conserve) se rapportent une par une au refuge ; porter ralentit (×0,8).
+- **Colonie** (Bible §1, `src/colony.rs`) : les miettes remplissent la réserve ; chaque cafard mange
+  (adulte 1 miette / 2 min, nymphe 1 / 4 min). Si la réserve couvre 2 miettes + 1 min de repas, une
+  **oothèque** est pondue (au plus une toutes les 40 s) ; elle éclot en 30 s en **4 nymphes** (une de moins par
+  niveau de menace : abri dérangé), qui deviennent adultes en 60 s. À réserve vide, une nymphe meurt de faim
+  toutes les 20 s. Les membres de la colonie se promènent sous le meuble.
 - **L'humain** entre dans la cuisine, patrouille ~45 s, puis sort ~25 s : c'est le moment de sortir. Sa tête
   change de couleur : beige = calme, jaune = remarque, orange = cherche, rouge = détecté.
 - **Antennes** : le HUD indique les vibrations de ses pas (aucune → très fortes) et si son regard est sur toi.
@@ -54,7 +59,8 @@ Sortir du refuge (sous le meuble bas) → explorer → sentir le danger → fuir
   bascule sol → mur en ~0,2 s, plafond, arête convexe, saut, gravité, laisse caméra, collision…).
 - `src/perception.rs` : perception humaine et suspicion 0-100 (`docs/specs/perception.md` §B), 7 tests.
 - `src/human.rs` : humain (présence, patrouille, regard, réactions, écrasement).
-- `src/game_loop.rs` : refuge, miettes, vies, menace, pièges, victoire / défaite, HUD de jeu.
+- `src/colony.rs` : réserve, ponte, éclosion, croissance, famine (6 tests).
+- `src/game_loop.rs` : refuge, miettes, colonie visible, vies, menace, pièges, victoire / défaite, HUD de jeu.
 - `src/main.rs` : scène cuisine (sol, murs, plafond, table à pieds, meuble en surplomb, frigo, planche fine,
   boîte de conserve, livres, rampe), cafard provisoire, HUD.
 

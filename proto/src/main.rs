@@ -51,7 +51,7 @@ fn main() {
         .add_systems(Startup, (spawn_scene, spawn_player, spawn_hud))
         .add_systems(
             Update,
-            (read_input, step_player, human::update_human, game_loop::update_game, update_camera, update_roach_visual, update_hud, draw_debug)
+            (read_input, step_player, human::update_human, game_loop::update_game, game_loop::update_colony_visuals, update_camera, update_roach_visual, update_hud, draw_debug)
                 .chain(),
         )
         .run();

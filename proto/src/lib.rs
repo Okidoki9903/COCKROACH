@@ -4,6 +4,7 @@
 //! analytique ; `main.rs` la branche sur Bevy + Avian.
 
 pub mod camera_rig;
+pub mod colony;
 pub mod perception;
 pub mod query;
 pub mod tuning;

@@ -7,6 +7,7 @@
 
 use bevy::prelude::*;
 
+use cockroach_proto::colony::{Colony, ColonyTuning};
 use cockroach_proto::walker::Walker;
 
 use crate::human::{Human, HumanTuning, reset_human};
@@ -15,7 +16,6 @@ use crate::{Player, PlayerInput, ROACH_RADIUS, SPAWN};
 /// Refuge : dessous du meuble bas (surélevé de 4 cm).
 pub const REFUGE_MIN: Vec3 = Vec3::new(-193.0, -1.0, -148.0);
 pub const REFUGE_MAX: Vec3 = Vec3::new(-47.0, 4.0, -106.0);
-const CRUMBS_TO_WIN: u32 = 10;
 const ACTIVE_CRUMBS: usize = 5;
 const PICK_RADIUS: f32 = 2.5 * ROACH_RADIUS;
 /// Ralentissement en portant une miette (Les Fourmis : ResourcesCarryingUnitSpeedRatio).
@@ -59,6 +59,8 @@ pub enum Phase {
 #[derive(Resource)]
 pub struct GameLoop {
     pub delivered: u32,
+    pub colony: Colony,
+    pub colony_tuning: ColonyTuning,
     pub carrying: bool,
     pub lives: u32,
     pub threat: u32,
@@ -76,6 +78,8 @@ impl Default for GameLoop {
     fn default() -> Self {
         Self {
             delivered: 0,
+            colony: Colony::default(),
+            colony_tuning: ColonyTuning::default(),
             carrying: false,
             lives: LIVES,
             threat: 0,
@@ -129,6 +133,11 @@ pub struct BigMessage;
 
 #[derive(Resource)]
 pub struct GameAssets {
+    member_mesh: Handle<Mesh>,
+    adult_mat: Handle<StandardMaterial>,
+    nymph_mat: Handle<StandardMaterial>,
+    ootheca_mesh: Handle<Mesh>,
+    ootheca_mat: Handle<StandardMaterial>,
     crumb_mesh: Handle<Mesh>,
     crumb_mat: Handle<StandardMaterial>,
     trap_mesh: Handle<Mesh>,
@@ -153,6 +162,16 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let assets = GameAssets {
+        member_mesh: meshes.add(Sphere::new(1.0)),
+        adult_mat: materials.add(StandardMaterial {
+            base_color: Color::srgb(0.26, 0.13, 0.05),
+            perceptual_roughness: 0.35,
+            ..default()
+        }),
+        // les nymphes qui viennent de muer sont pâles
+        nymph_mat: materials.add(StandardMaterial { base_color: Color::srgb(0.75, 0.62, 0.45), ..default() }),
+        ootheca_mesh: meshes.add(Capsule3d::new(0.35, 0.9)),
+        ootheca_mat: materials.add(StandardMaterial { base_color: Color::srgb(0.35, 0.18, 0.08), ..default() }),
         crumb_mesh: meshes.add(Sphere::new(0.8)),
         crumb_mat: materials.add(StandardMaterial {
             base_color: Color::srgb(0.95, 0.75, 0.35),
@@ -224,7 +243,11 @@ pub fn update_game(
     // --- fin de partie : R / Start pour recommencer
     if gl.phase != Phase::Playing {
         big.0 = match &gl.phase {
-            Phase::Won => format!("VICTOIRE ! {} miettes : la nichee grandit.\nR / Start : rejouer", gl.delivered),
+            Phase::Won => format!(
+                "VICTOIRE ! La colonie compte {} cafards ({} miettes).\nR / Start : rejouer",
+                gl.colony.population(),
+                gl.delivered
+            ),
             Phase::Lost(reason) => format!("PARTIE PERDUE : {reason}\nR / Start : rejouer"),
             Phase::Playing => String::new(),
         };
@@ -266,11 +289,9 @@ pub fn update_game(
     } else if gl.in_refuge {
         gl.carrying = false;
         gl.delivered += 1;
-        let n = gl.delivered;
-        gl.say(format!("Miette rapportee ({n}/{CRUMBS_TO_WIN})"));
-        if n >= CRUMBS_TO_WIN {
-            gl.phase = Phase::Won;
-        }
+        gl.colony.add_food(1.0);
+        let food = gl.colony.food;
+        gl.say(format!("Miette rapportee : reserve de la colonie {food:.1}"));
     }
 
     // --- événements de l'humain : détection (escalade) et écrasement
@@ -311,6 +332,24 @@ pub fn update_game(
         }
     }
 
+    // --- vie de la colonie (Bible §1 : nourriture + abri correct = reproduction)
+    let threat = gl.threat;
+    let ct = gl.colony_tuning.clone();
+    let ev = gl.colony.step(&ct, threat, dt);
+    if ev.starved > 0 {
+        gl.say("Une nymphe est morte de faim... rapporte des miettes !");
+    } else if ev.hatched > 0 {
+        let n = ev.hatched;
+        gl.say(format!("{n} nymphe(s) viennent d'eclore !"));
+    } else if ev.laid {
+        gl.say("Une ootheque a ete pondue dans le refuge.");
+    } else if ev.matured > 0 {
+        gl.say("Une nymphe est devenue adulte.");
+    }
+    if gl.colony.reached_goal(&ct) {
+        gl.phase = Phase::Won;
+    }
+
     // --- pièges collants
     gl.trap_cooldown = (gl.trap_cooldown - dt).max(0.0);
     gl.stuck = (gl.stuck - dt).max(0.0);
@@ -342,15 +381,130 @@ pub fn update_game(
     }
 }
 
+/// Membre visible de la colonie (le joueur n'en fait pas partie) : il se promène dans le refuge.
+#[derive(Component)]
+pub struct ColonyMember {
+    nymph: bool,
+    dir: Vec3,
+    turn_in: f32,
+}
+
+#[derive(Component)]
+pub struct Ootheca;
+
+const MEMBER_SPEED: f32 = 3.0; // cm/s : promenade tranquille
+const MEMBER_SHAPE: Vec3 = Vec3::new(0.75, 0.38, 1.45);
+/// Emplacements des oothèques, dans le coin du refuge contre le mur.
+const OOTHECA_SPOTS: [Vec3; 6] = [
+    Vec3::new(-185.0, 0.4, -144.0),
+    Vec3::new(-182.0, 0.4, -144.0),
+    Vec3::new(-179.0, 0.4, -144.0),
+    Vec3::new(-185.0, 0.4, -141.0),
+    Vec3::new(-182.0, 0.4, -141.0),
+    Vec3::new(-179.0, 0.4, -141.0),
+];
+
+/// Pseudo-hasard déterministe dans [0, 1).
+fn hash01(x: f32) -> f32 {
+    (x.sin() * 43_758.547).fract().abs()
+}
+
+fn random_refuge_point(seed: f32, y: f32) -> Vec3 {
+    let m = 4.0;
+    Vec3::new(
+        REFUGE_MIN.x + m + hash01(seed) * (REFUGE_MAX.x - REFUGE_MIN.x - 2.0 * m),
+        y,
+        REFUGE_MIN.z + m + hash01(seed * 1.7 + 3.1) * (REFUGE_MAX.z - REFUGE_MIN.z - 2.0 * m),
+    )
+}
+
+/// Fait correspondre les cafards visibles à l'état de la colonie, et les fait se promener.
+pub fn update_colony_visuals(
+    mut commands: Commands,
+    time: Res<Time>,
+    assets: Res<GameAssets>,
+    gl: Res<GameLoop>,
+    mut members: Query<(Entity, &mut ColonyMember, &mut Transform), Without<Ootheca>>,
+    oothecae: Query<Entity, With<Ootheca>>,
+) {
+    let dt = time.delta_secs().min(0.05);
+    let now = time.elapsed_secs();
+    let want = [(false, gl.colony.adults.saturating_sub(1) as usize), (true, gl.colony.nymphs.len())];
+    for (nymph, count) in want {
+        let have: Vec<Entity> = members.iter().filter(|(_, m, _)| m.nymph == nymph).map(|(e, _, _)| e).collect();
+        for e in have.iter().skip(count) {
+            commands.entity(*e).despawn();
+        }
+        for i in have.len()..count {
+            let scale = if nymph { 0.5 } else { 1.0 } * ROACH_RADIUS;
+            let seed = now * 13.0 + i as f32 * 7.3 + if nymph { 100.0 } else { 0.0 };
+            let pos = random_refuge_point(seed, MEMBER_SHAPE.y * scale);
+            commands.spawn((
+                ColonyMember { nymph, dir: Vec3::X, turn_in: 0.0 },
+                Mesh3d(assets.member_mesh.clone()),
+                MeshMaterial3d(if nymph { assets.nymph_mat.clone() } else { assets.adult_mat.clone() }),
+                Transform::from_translation(pos).with_scale(MEMBER_SHAPE * scale),
+            ));
+        }
+    }
+    let have: Vec<Entity> = oothecae.iter().collect();
+    let want_o = gl.colony.oothecae.len().min(OOTHECA_SPOTS.len());
+    for e in have.iter().skip(want_o) {
+        commands.entity(*e).despawn();
+    }
+    for i in have.len()..want_o {
+        commands.spawn((
+            Ootheca,
+            Mesh3d(assets.ootheca_mesh.clone()),
+            MeshMaterial3d(assets.ootheca_mat.clone()),
+            Transform::from_translation(OOTHECA_SPOTS[i]).with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_2)),
+        ));
+    }
+
+    // Promenade : changement de cap toutes les 1-3 s, rebond sur les bords du refuge.
+    for (e, mut m, mut tf) in &mut members {
+        m.turn_in -= dt;
+        if m.turn_in <= 0.0 {
+            let a = hash01(now * 3.1 + e.index_u32() as f32 * 0.37) * std::f32::consts::TAU;
+            m.dir = Vec3::new(a.cos(), 0.0, a.sin());
+            m.turn_in = 1.0 + 2.0 * hash01(now + e.index_u32() as f32);
+        }
+        let speed = if m.nymph { MEMBER_SPEED * 0.7 } else { MEMBER_SPEED };
+        let mut p = tf.translation + m.dir * speed * dt;
+        for axis in [0usize, 2] {
+            let (lo, hi) = (REFUGE_MIN[axis] + 3.0, REFUGE_MAX[axis] - 3.0);
+            if p[axis] < lo || p[axis] > hi {
+                p[axis] = p[axis].clamp(lo, hi);
+                m.dir[axis] = -m.dir[axis];
+            }
+        }
+        tf.translation = p;
+        tf.look_to(m.dir, Vec3::Y);
+    }
+}
+
 /// Lignes de HUD de la boucle de jeu (objectif, vies, menace, humain, antennes).
 pub fn hud_lines(gl: &GameLoop, human: Option<&Human>, roach: Vec3) -> String {
+    let c = &gl.colony;
+    let shelter = match gl.threat {
+        0 => "calme",
+        1 => "un peu derange",
+        2 | 3 => "derange",
+        _ => "inhabitable",
+    };
     let mut s = format!(
-        "Miettes : {}/{}{}   Vies : {}   Menace : {}/4{}\n",
-        gl.delivered,
-        CRUMBS_TO_WIN,
-        if gl.carrying { " (en porte une)" } else { "" },
+        "Colonie : {} / {} cafards ({} adultes, {} nymphes, {} ootheque(s))   reserve : {:.1} miette(s)   abri : {}\n\
+         Vies : {}   Menace : {}/4{}{}\n",
+        c.population(),
+        gl.colony_tuning.goal,
+        c.adults,
+        c.nymphs.len(),
+        c.oothecae.len(),
+        c.food,
+        shelter,
         gl.lives,
         gl.threat,
+        if gl.carrying { "   (porte une miette)" } else { "" },
         if gl.in_refuge { "   [A L'ABRI]" } else { "" },
     );
     if let Some(h) = human {
