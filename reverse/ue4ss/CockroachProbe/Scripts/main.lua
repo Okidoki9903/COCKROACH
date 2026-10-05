@@ -461,10 +461,12 @@ local function perception()
     local gs = getGameState()
     if ok(gs) and pawn ~= nil then
         local pl = pawn:K2_GetActorLocation()
-        f:write("\n==== Unités à moins de ", UNIT_RADIUS, " u\n")
-        pcall(function()
+        f:write("\n==== Unités à moins de ", UNIT_RADIUS, " u  (état de jeu : ", fullName(gs), ")\n")
+        local total, failed = 0, 0
+        local okArr, errArr = pcall(function()
             gs.m_unitsPrivate:ForEach(function(_, elem)
-                pcall(function()
+                total = total + 1
+                local okU = pcall(function()
                     local u = elem:get()
                     local tr = u.m_transform.Translation
                     local d = math.sqrt((tr.X - pl.X) ^ 2 + (tr.Y - pl.Y) ^ 2 + (tr.Z - pl.Z) ^ 2)
@@ -476,8 +478,11 @@ local function perception()
                             tostring(u.m_chasedGeneral)))
                     end
                 end)
+                if not okU then failed = failed + 1 end
             end)
         end)
+        f:write(string.format("  total unités=%d  lectures échouées=%d  tableau=%s %s\n",
+            total, failed, tostring(okArr), tostring(errArr or "")))
     end
     f:close()
     print("[CockroachProbe] perception -> " .. name .. "\n")

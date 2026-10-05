@@ -1,0 +1,122 @@
+# Réglages de perception lus en jeu (F10) — Empire of the Ants UE 5.4, hub H1, perception_20261005_104539.txt. Valeurs uniquement.
+# 1 u = 1 cm moteur ; corps de la fourmi joueur R = 14 u.
+# game_t: nan
+
+  ColdDetectionDistance=-1.0  TepidDetectionDistance=1500.0  WarmDetectionDistance=-1.0  SizzlingDetectionDistance=750.0  HotDetectionDistance=-1.0
+  clan[1] Clan=0  Alliance=0  Civilization=0  PlayerType=0  DetectionTime=0.0  DetectionRangeModifier=1.0  Personality=2  ThinkSpeed=2  Wisdom=2  ArmyCount=2  StartEnabled=true
+  clan[2] Clan=8  Alliance=8  Civilization=0  PlayerType=3  DetectionTime=0.0  DetectionRangeModifier=1.0  Personality=2  ThinkSpeed=2  Wisdom=2  ArmyCount=2  StartEnabled=true
+
+  [T1WarriorAnt] TypeUnit=1  UnitName=T1WarriorAnt  Category=0  Tier=1  IsAntUnit=true  Movement=170.0  MaxAgents=100  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2WarriorAnt] TypeUnit=2  UnitName=T2WarriorAnt  Category=0  Tier=2  IsAntUnit=true  Movement=170.0  MaxAgents=125  Moral=70.0  Cohesion=30  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3WarriorAnt] TypeUnit=3  UnitName=T3WarriorAnt  Category=0  Tier=3  IsAntUnit=true  Movement=170.0  MaxAgents=150  Moral=70.0  Cohesion=25  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1WorkerAnt] TypeUnit=4  UnitName=T1WorkerAnt  Category=1  Tier=1  IsAntUnit=true  Movement=150.0  MaxAgents=250  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T2WorkerAnt] TypeUnit=5  UnitName=T2WorkerAnt  Category=1  Tier=2  IsAntUnit=true  Movement=150.0  MaxAgents=300  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T3WorkerAnt] TypeUnit=6  UnitName=T3WorkerAnt  Category=1  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=350  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T1GunnerAnt] TypeUnit=7  UnitName=T1GunnerAnt  Category=2  Tier=1  IsAntUnit=true  Movement=130.0  MaxAgents=150  Moral=60.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerAnt] TypeUnit=8  UnitName=T2GunnerAnt  Category=2  Tier=2  IsAntUnit=true  Movement=130.0  MaxAgents=200  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T3GunnerAnt] TypeUnit=9  UnitName=T3GunnerAnt  Category=2  Tier=3  IsAntUnit=true  Movement=130.0  MaxAgents=250  Moral=60.0  Cohesion=30  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [Ladybug] TypeUnit=19  UnitName=Ladybug  Category=3  Tier=2  IsAntUnit=false  Movement=225.0  MaxAgents=80  Moral=70.0  Cohesion=10  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [RoseChafer] TypeUnit=27  UnitName=RoseChafer  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=50  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [DorBeetle] TypeUnit=28  UnitName=DorBeetle  Category=3  Tier=2  IsAntUnit=false  Movement=225.0  MaxAgents=50  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [Aphid] TypeUnit=20  UnitName=Aphid  Category=4  Tier=1  IsAntUnit=false  Movement=150.0  MaxAgents=400  Moral=60.0  Cohesion=30  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [Snail] TypeUnit=25  UnitName=Snail  Category=4  Tier=1  IsAntUnit=false  Movement=110.0  MaxAgents=1  Moral=100.0  Cohesion=55  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1NestGuard] TypeUnit=21  UnitName=T1NestGuard  Category=5  Tier=1  IsAntUnit=true  Movement=100.0  MaxAgents=350  Moral=80.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2NestGuard] TypeUnit=22  UnitName=T2NestGuard  Category=5  Tier=2  IsAntUnit=true  Movement=125.0  MaxAgents=150  Moral=60.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3NestGuard] TypeUnit=23  UnitName=T3NestGuard  Category=5  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=200  Moral=50.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [Wall] TypeUnit=24  UnitName=Wall  Category=5  Tier=1  IsAntUnit=false  Movement=100.0  MaxAgents=0  Moral=70.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [MantisBig] TypeUnit=30  UnitName=MantisBig  Category=3  Tier=3  IsAntUnit=false  Movement=350.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [MantisSmall] TypeUnit=31  UnitName=MantisSmall  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [SpiderBig] TypeUnit=48  UnitName=SpiderBig  Category=3  Tier=3  IsAntUnit=false  Movement=300.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [SpiderSmall] TypeUnit=47  UnitName=SpiderSmall  Category=4  Tier=1  IsAntUnit=false  Movement=200.0  MaxAgents=500  Moral=100.0  Cohesion=25  AggroRadiusFactor=0.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [Firebug] TypeUnit=35  UnitName=Firebug  Category=4  Tier=1  IsAntUnit=false  Movement=120.0  MaxAgents=100  Moral=40.0  Cohesion=10  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T1WarriorTermite] TypeUnit=10  UnitName=T1WarriorTermite  Category=0  Tier=1  IsAntUnit=true  Movement=160.0  MaxAgents=100  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T2WarriorTermite] TypeUnit=11  UnitName=T2WarriorTermite  Category=0  Tier=2  IsAntUnit=true  Movement=160.0  MaxAgents=125  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T3WarriorTermite] TypeUnit=12  UnitName=T3WarriorTermite  Category=0  Tier=3  IsAntUnit=true  Movement=160.0  MaxAgents=150  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T1WorkerTermite] TypeUnit=13  UnitName=T1WorkerTermite  Category=1  Tier=1  IsAntUnit=true  Movement=140.0  MaxAgents=200  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T2WorkerTermite] TypeUnit=14  UnitName=T2WorkerTermite  Category=1  Tier=2  IsAntUnit=true  Movement=140.0  MaxAgents=250  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T3WorkerTermite] TypeUnit=15  UnitName=T3WorkerTermite  Category=1  Tier=3  IsAntUnit=true  Movement=140.0  MaxAgents=300  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T1GunnerTermite] TypeUnit=16  UnitName=T1GunnerTermite  Category=2  Tier=1  IsAntUnit=true  Movement=120.0  MaxAgents=150  Moral=60.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerTermite] TypeUnit=17  UnitName=T2GunnerTermite  Category=2  Tier=2  IsAntUnit=true  Movement=120.0  MaxAgents=200  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=2.0
+  [T3GunnerTermite] TypeUnit=18  UnitName=T3GunnerTermite  Category=2  Tier=3  IsAntUnit=true  Movement=120.0  MaxAgents=250  Moral=60.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T1WarriorBlackAnt] TypeUnit=36  UnitName=T1WarriorBlackAnt  Category=0  Tier=1  IsAntUnit=true  Movement=170.0  MaxAgents=100  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2WarriorBlackAnt] TypeUnit=37  UnitName=T2WarriorBlackAnt  Category=0  Tier=2  IsAntUnit=true  Movement=170.0  MaxAgents=125  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3WarriorBlackAnt] TypeUnit=38  UnitName=T3WarriorBlackAnt  Category=0  Tier=3  IsAntUnit=true  Movement=170.0  MaxAgents=150  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1WorkerBlackAnt] TypeUnit=39  UnitName=T1WorkerBlackAnt  Category=1  Tier=1  IsAntUnit=true  Movement=150.0  MaxAgents=250  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T2WorkerBlackAnt] TypeUnit=40  UnitName=T2WorkerBlackAnt  Category=1  Tier=2  IsAntUnit=true  Movement=150.0  MaxAgents=300  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T3WorkerBlackAnt] TypeUnit=41  UnitName=T3WorkerBlackAnt  Category=1  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=350  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T1GunnerBlackAnt] TypeUnit=42  UnitName=T1GunnerBlackAnt  Category=2  Tier=1  IsAntUnit=true  Movement=130.0  MaxAgents=150  Moral=60.0  Cohesion=50  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerBlackAnt] TypeUnit=43  UnitName=T2GunnerBlackAnt  Category=2  Tier=2  IsAntUnit=true  Movement=130.0  MaxAgents=200  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T3GunnerBlackAnt] TypeUnit=44  UnitName=T3GunnerBlackAnt  Category=2  Tier=3  IsAntUnit=true  Movement=130.0  MaxAgents=250  Moral=60.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [Hornet] TypeUnit=29  UnitName=Hornet  Category=3  Tier=2  IsAntUnit=false  Movement=800.0  MaxAgents=60  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [Rhino] TypeUnit=45  UnitName=Rhino  Category=4  Tier=1  IsAntUnit=false  Movement=800.0  MaxAgents=10  Moral=0.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [PlayerMantis] TypeUnit=46  UnitName=PlayerMantis  Category=3  Tier=3  IsAntUnit=false  Movement=350.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [Paussus] TypeUnit=50  UnitName=Paussus  Category=4  Tier=1  IsAntUnit=false  Movement=150.0  MaxAgents=10  Moral=100.0  Cohesion=55  AggroRadiusFactor=0.0  MeleeSlotsNumber=0  BreakFightDurationFactor=0.0
+  [PotatoBeetle] TypeUnit=51  UnitName=PotatoBeetle  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=20  Moral=70.0  Cohesion=50  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+
+  [T1WarriorAnt] TypeUnit=1  UnitName=T1WarriorAnt  Category=0  Tier=1  IsAntUnit=true  Movement=170.0  MaxAgents=100  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2WarriorAnt] TypeUnit=2  UnitName=T2WarriorAnt  Category=0  Tier=2  IsAntUnit=true  Movement=170.0  MaxAgents=125  Moral=70.0  Cohesion=30  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3WarriorAnt] TypeUnit=3  UnitName=T3WarriorAnt  Category=0  Tier=3  IsAntUnit=true  Movement=170.0  MaxAgents=150  Moral=70.0  Cohesion=25  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1WorkerAnt] TypeUnit=4  UnitName=T1WorkerAnt  Category=1  Tier=1  IsAntUnit=true  Movement=150.0  MaxAgents=250  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T2WorkerAnt] TypeUnit=5  UnitName=T2WorkerAnt  Category=1  Tier=2  IsAntUnit=true  Movement=150.0  MaxAgents=300  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T3WorkerAnt] TypeUnit=6  UnitName=T3WorkerAnt  Category=1  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=350  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T1GunnerAnt] TypeUnit=7  UnitName=T1GunnerAnt  Category=2  Tier=1  IsAntUnit=true  Movement=130.0  MaxAgents=150  Moral=60.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerAnt] TypeUnit=8  UnitName=T2GunnerAnt  Category=2  Tier=2  IsAntUnit=true  Movement=130.0  MaxAgents=200  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T3GunnerAnt] TypeUnit=9  UnitName=T3GunnerAnt  Category=2  Tier=3  IsAntUnit=true  Movement=130.0  MaxAgents=250  Moral=60.0  Cohesion=30  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [Ladybug] TypeUnit=19  UnitName=Ladybug  Category=3  Tier=2  IsAntUnit=false  Movement=225.0  MaxAgents=80  Moral=70.0  Cohesion=10  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [RoseChafer] TypeUnit=27  UnitName=RoseChafer  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=50  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [DorBeetle] TypeUnit=28  UnitName=DorBeetle  Category=3  Tier=2  IsAntUnit=false  Movement=225.0  MaxAgents=50  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+  [Aphid] TypeUnit=20  UnitName=Aphid  Category=4  Tier=1  IsAntUnit=false  Movement=150.0  MaxAgents=400  Moral=60.0  Cohesion=30  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [Snail] TypeUnit=25  UnitName=Snail  Category=4  Tier=1  IsAntUnit=false  Movement=110.0  MaxAgents=1  Moral=100.0  Cohesion=55  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1NestGuard] TypeUnit=21  UnitName=T1NestGuard  Category=5  Tier=1  IsAntUnit=true  Movement=100.0  MaxAgents=350  Moral=80.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2NestGuard] TypeUnit=22  UnitName=T2NestGuard  Category=5  Tier=2  IsAntUnit=true  Movement=125.0  MaxAgents=150  Moral=60.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3NestGuard] TypeUnit=23  UnitName=T3NestGuard  Category=5  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=200  Moral=50.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [Wall] TypeUnit=24  UnitName=Wall  Category=5  Tier=1  IsAntUnit=false  Movement=100.0  MaxAgents=0  Moral=70.0  Cohesion=60  AggroRadiusFactor=0.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [MantisBig] TypeUnit=30  UnitName=MantisBig  Category=3  Tier=3  IsAntUnit=false  Movement=350.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [MantisSmall] TypeUnit=31  UnitName=MantisSmall  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [SpiderBig] TypeUnit=48  UnitName=SpiderBig  Category=3  Tier=3  IsAntUnit=false  Movement=300.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [SpiderSmall] TypeUnit=47  UnitName=SpiderSmall  Category=4  Tier=1  IsAntUnit=false  Movement=200.0  MaxAgents=500  Moral=100.0  Cohesion=25  AggroRadiusFactor=0.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [Firebug] TypeUnit=35  UnitName=Firebug  Category=4  Tier=1  IsAntUnit=false  Movement=120.0  MaxAgents=100  Moral=40.0  Cohesion=10  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T1WarriorTermite] TypeUnit=10  UnitName=T1WarriorTermite  Category=0  Tier=1  IsAntUnit=true  Movement=160.0  MaxAgents=100  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T2WarriorTermite] TypeUnit=11  UnitName=T2WarriorTermite  Category=0  Tier=2  IsAntUnit=true  Movement=160.0  MaxAgents=125  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T3WarriorTermite] TypeUnit=12  UnitName=T3WarriorTermite  Category=0  Tier=3  IsAntUnit=true  Movement=160.0  MaxAgents=150  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=1.0
+  [T1WorkerTermite] TypeUnit=13  UnitName=T1WorkerTermite  Category=1  Tier=1  IsAntUnit=true  Movement=140.0  MaxAgents=200  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T2WorkerTermite] TypeUnit=14  UnitName=T2WorkerTermite  Category=1  Tier=2  IsAntUnit=true  Movement=140.0  MaxAgents=250  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T3WorkerTermite] TypeUnit=15  UnitName=T3WorkerTermite  Category=1  Tier=3  IsAntUnit=true  Movement=140.0  MaxAgents=300  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [T1GunnerTermite] TypeUnit=16  UnitName=T1GunnerTermite  Category=2  Tier=1  IsAntUnit=true  Movement=120.0  MaxAgents=150  Moral=60.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerTermite] TypeUnit=17  UnitName=T2GunnerTermite  Category=2  Tier=2  IsAntUnit=true  Movement=120.0  MaxAgents=200  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=4  BreakFightDurationFactor=2.0
+  [T3GunnerTermite] TypeUnit=18  UnitName=T3GunnerTermite  Category=2  Tier=3  IsAntUnit=true  Movement=120.0  MaxAgents=250  Moral=60.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T1WarriorBlackAnt] TypeUnit=36  UnitName=T1WarriorBlackAnt  Category=0  Tier=1  IsAntUnit=true  Movement=170.0  MaxAgents=100  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T2WarriorBlackAnt] TypeUnit=37  UnitName=T2WarriorBlackAnt  Category=0  Tier=2  IsAntUnit=true  Movement=170.0  MaxAgents=125  Moral=70.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T3WarriorBlackAnt] TypeUnit=38  UnitName=T3WarriorBlackAnt  Category=0  Tier=3  IsAntUnit=true  Movement=170.0  MaxAgents=150  Moral=70.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=5  BreakFightDurationFactor=1.0
+  [T1WorkerBlackAnt] TypeUnit=39  UnitName=T1WorkerBlackAnt  Category=1  Tier=1  IsAntUnit=true  Movement=150.0  MaxAgents=250  Moral=40.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T2WorkerBlackAnt] TypeUnit=40  UnitName=T2WorkerBlackAnt  Category=1  Tier=2  IsAntUnit=true  Movement=150.0  MaxAgents=300  Moral=40.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T3WorkerBlackAnt] TypeUnit=41  UnitName=T3WorkerBlackAnt  Category=1  Tier=3  IsAntUnit=true  Movement=150.0  MaxAgents=350  Moral=40.0  Cohesion=35  AggroRadiusFactor=1.0  MeleeSlotsNumber=7  BreakFightDurationFactor=1.0
+  [T1GunnerBlackAnt] TypeUnit=42  UnitName=T1GunnerBlackAnt  Category=2  Tier=1  IsAntUnit=true  Movement=130.0  MaxAgents=150  Moral=60.0  Cohesion=50  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T2GunnerBlackAnt] TypeUnit=43  UnitName=T2GunnerBlackAnt  Category=2  Tier=2  IsAntUnit=true  Movement=130.0  MaxAgents=200  Moral=70.0  Cohesion=45  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [T3GunnerBlackAnt] TypeUnit=44  UnitName=T3GunnerBlackAnt  Category=2  Tier=3  IsAntUnit=true  Movement=130.0  MaxAgents=250  Moral=60.0  Cohesion=40  AggroRadiusFactor=1.0  MeleeSlotsNumber=6  BreakFightDurationFactor=2.0
+  [Hornet] TypeUnit=29  UnitName=Hornet  Category=3  Tier=2  IsAntUnit=false  Movement=800.0  MaxAgents=60  Moral=70.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [Rhino] TypeUnit=45  UnitName=Rhino  Category=4  Tier=1  IsAntUnit=false  Movement=800.0  MaxAgents=10  Moral=0.0  Cohesion=0  AggroRadiusFactor=0.0  MeleeSlotsNumber=6  BreakFightDurationFactor=1.0
+  [PlayerMantis] TypeUnit=46  UnitName=PlayerMantis  Category=3  Tier=3  IsAntUnit=false  Movement=350.0  MaxAgents=1  Moral=100.0  Cohesion=40  AggroRadiusFactor=0.0  MeleeSlotsNumber=3  BreakFightDurationFactor=1.0
+  [Paussus] TypeUnit=50  UnitName=Paussus  Category=4  Tier=1  IsAntUnit=false  Movement=150.0  MaxAgents=10  Moral=100.0  Cohesion=55  AggroRadiusFactor=0.0  MeleeSlotsNumber=0  BreakFightDurationFactor=0.0
+  [PotatoBeetle] TypeUnit=51  UnitName=PotatoBeetle  Category=3  Tier=2  IsAntUnit=false  Movement=250.0  MaxAgents=20  Moral=70.0  Cohesion=50  AggroRadiusFactor=0.0  MeleeSlotsNumber=8  BreakFightDurationFactor=1.0
+
+  [CoreStats] DetectionRange=1500  PlayerDetectionRange=1500  CreepsDetectionRangeFactor=2.0  StandardUnitSpeed=75.0  StandardCohesionRadius=600.0  UnitBreakFightDuration=3.0  IdleHealSpeed=100.0  HostileUnitDamagesPerSec=0.050000000745058  CreepDamagesPerSec=0.20000000298023  CreepRedZoneRatio=1.0  CreepYellowZoneRatio=2.5  AttritionTimeToKill=180
+
+==== JumpingSpiderWaypoint (0)
+
+==== JumpingSpider (0)
+
+==== BreathingWorldFollowerSpawner (6)
+  -2698.0033,1709.7411,1256.0584  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=150  DivergenceFactor=0.0
+  6591.5283,1981.5396,1351.7696  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=200  DivergenceFactor=0.0
+  -10084.0045,7729.7742,-44.2769  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=150  DivergenceFactor=0.0
+  -802.4230,4591.7070,-420.1953  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=100  DivergenceFactor=0.0
+  -10605.1213,-4468.3133,1281.9491  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=150  DivergenceFactor=0.0
+  -2745.9477,3980.7838,603.8743  PlayerHearingRange=500.0  AgentSpeed=100.0  AmountToSpawn=200  DivergenceFactor=0.0
+
+==== BreathingWorldSecurityLine (0)
+
+==== Joueur
+  NestDetectionSphereRadius=200.0  ResourceDetectionSphereRadius=400.0  ForagingDetectionSphereRadius=400.0  SpideySenseTickInterval=2.0  SpideySenseTickNumber=5  BarrierInteractionRadius=40.0
+
+  total unités=0  lectures échouées=0  tableau=true 
