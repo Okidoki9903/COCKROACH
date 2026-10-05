@@ -1,7 +1,9 @@
-//! Humain de test : patrouille, regard, perception et suspicion (docs/specs/perception.md §B).
+//! Humain : rythme de présence, patrouille, regard, perception et suspicion (docs/specs/perception.md §B).
 //!
+//! Il entre dans la cuisine, patrouille ~45 s puis sort ~25 s (fenêtre pour sortir du refuge).
 //! Calme → patrouille en balayant du regard ; Remarque (≥ 30) → s'arrête et regarde la dernière position vue ;
 //! Cherche (≥ 60) → marche vers elle ; Détecté (100) → vient écraser le cafard s'il est au sol (zone rouge).
+//! Les détections et écrasements sont envoyés à la boucle de jeu (`GameEvents`).
 //! L'humain n'a pas de collider : le cafard ne peut pas (encore) lui grimper dessus.
 
 use std::f32::consts::TAU;
@@ -13,7 +15,8 @@ use cockroach_proto::perception::{Awareness, Observer, PerceptionTuning, Suspici
 use cockroach_proto::query::SurfaceQuery;
 use cockroach_proto::walker::Walker;
 
-use crate::{AvianQuery, Player, ROACH_RADIUS, SPAWN, SUN_POSITION, Settings};
+use crate::game_loop::{GameEvents, GameLoop, Phase};
+use crate::{AvianQuery, Player, ROACH_RADIUS, SUN_POSITION, Settings};
 
 const EYE_HEIGHT: f32 = 160.0;
 const BODY_RADIUS: f32 = 18.0;
@@ -25,6 +28,10 @@ const SWEEP_ANGLE: f32 = 0.6; // ±35° de balayage du regard en patrouille
 const SWEEP_PERIOD: f32 = 5.0;
 /// Rayon horizontal d'un pied (zone d'écrasement effective = pied + zone rouge).
 const FOOT_RADIUS: f32 = 14.0;
+const PRESENT_TIME: f32 = 45.0;
+const AWAY_TIME: f32 = 25.0;
+/// Porte de la cuisine (l'humain y apparaît et y disparaît).
+const DOOR: Vec3 = Vec3::new(185.0, 0.0, 135.0);
 const PATROL: [Vec3; 4] = [
     Vec3::new(-140.0, 0.0, 100.0),
     Vec3::new(140.0, 0.0, 100.0),
@@ -53,9 +60,37 @@ pub struct Human {
     pub suspicion: Suspicion,
     pub last_visibility: Sight,
     pub in_shadow: bool,
+    /// Dans la cuisine ?
+    pub present: bool,
+    /// Temps restant dans la phase présente / absente (s).
+    pub schedule: f32,
+    leaving: bool,
+    was_detected: bool,
     sweep_time: f32,
-    /// Affiche « Écrasé ! » pendant quelques secondes.
-    pub squash_message: f32,
+}
+
+impl Human {
+    fn new() -> Self {
+        let facing = (PATROL[1] - PATROL[0]).normalize();
+        Self {
+            position: PATROL[0],
+            facing,
+            gaze: facing,
+            waypoint: 1,
+            suspicion: Suspicion::default(),
+            last_visibility: Sight::default(),
+            in_shadow: false,
+            present: true,
+            schedule: PRESENT_TIME,
+            leaving: false,
+            was_detected: false,
+            sweep_time: 0.0,
+        }
+    }
+}
+
+pub fn reset_human(h: &mut Human) {
+    *h = Human::new();
 }
 
 #[derive(Component)]
@@ -85,26 +120,12 @@ fn spawn_human(
     };
     let clothes = mat(&mut materials, 0.25, 0.32, 0.45);
     let shoes = mat(&mut materials, 0.10, 0.10, 0.10);
-    let start = PATROL[0];
-    let facing = (PATROL[1] - PATROL[0]).normalize();
+    let human = Human::new();
+    let start = human.position;
     commands
-        .spawn((
-            Human {
-                position: start,
-                facing,
-                gaze: facing,
-                waypoint: 1,
-                suspicion: Suspicion::default(),
-                last_visibility: Sight::default(),
-                in_shadow: false,
-                sweep_time: 0.0,
-                squash_message: 0.0,
-            },
-            Transform::from_translation(start),
-            Visibility::default(),
-        ))
+        .spawn((human, Transform::from_translation(start), Visibility::default()))
         .with_children(|p| {
-            // Jambes, torse, tête : repère local +Y haut, -Z avant.
+            // Jambes, chaussures, torse : repère local +Y haut, -Z avant.
             for x in [-9.0f32, 9.0] {
                 p.spawn((
                     Mesh3d(meshes.add(Capsule3d::new(7.0, 70.0))),
@@ -129,6 +150,7 @@ fn spawn_human(
         Mesh3d(meshes.add(Sphere::new(11.0))),
         MeshMaterial3d(heads.calm.clone()),
         Transform::from_translation(start + Vec3::Y * EYE_HEIGHT),
+        Visibility::default(),
         children![(
             Mesh3d(meshes.add(Cuboid::new(3.0, 3.0, 8.0))),
             MeshMaterial3d(heads.calm.clone()),
@@ -151,11 +173,28 @@ fn flat(v: Vec3) -> Vec3 {
     Vec3::new(v.x, 0.0, v.z).normalize_or_zero()
 }
 
+fn horizontal_distance(a: Vec3, b: Vec3) -> f32 {
+    Vec3::new(a.x - b.x, 0.0, a.z - b.z).length()
+}
+
 /// Le cafard est-il à l'ombre ? Rayon vers le soleil de la scène.
 fn roach_in_shadow(q: &impl SurfaceQuery, w: &Walker) -> bool {
     let origin = w.position + w.up * ROACH_RADIUS * 0.6;
     let to_sun = (SUN_POSITION - origin).normalize();
     q.ray(origin, to_sun, 2000.0).is_some()
+}
+
+/// Avance vers `to` (au sol) ; retourne la distance horizontale restante.
+fn walk_towards(h: &mut Human, to: Vec3, speed: f32, stop: f32, dt: f32) -> f32 {
+    let dist = horizontal_distance(to, h.position);
+    let d = flat(to - h.position);
+    if d != Vec3::ZERO && dist > stop {
+        h.facing = flat(turn_towards(h.facing, d, TURN_SPEED * dt)).normalize_or(h.facing);
+        let step = (speed * dt).min(dist - stop);
+        let facing = h.facing;
+        h.position += facing * step;
+    }
+    horizontal_distance(to, h.position)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -165,19 +204,44 @@ pub fn update_human(
     tuning: Res<HumanTuning>,
     spatial: SpatialQuery,
     heads: Res<HeadMaterials>,
-    mut player: ResMut<Player>,
-    mut human: Single<(&mut Human, &mut Transform), Without<HumanHead>>,
-    mut head: Single<(&mut Transform, &mut MeshMaterial3d<StandardMaterial>), With<HumanHead>>,
+    game: Res<GameLoop>,
+    mut events: ResMut<GameEvents>,
+    player: Res<Player>,
+    mut human: Single<(&mut Human, &mut Transform, &mut Visibility), Without<HumanHead>>,
+    mut head: Single<(&mut Transform, &mut MeshMaterial3d<StandardMaterial>, &mut Visibility), With<HumanHead>>,
     mut gizmos: Gizmos,
 ) {
     let dt = time.delta_secs().min(0.05);
     let pt = &tuning.0;
     let q = AvianQuery { spatial: &spatial, filter: SpatialQueryFilter::default() };
-    let (h, body_tf) = &mut *human;
-    let w = player.walker.clone();
+    let (h, body_tf, body_vis) = &mut *human;
+    let (head_tf, head_mat, head_vis) = &mut *head;
+    let w = &player.walker;
+    let playing = game.phase == Phase::Playing;
+
+    // --- rythme de présence
+    h.schedule -= dt;
+    if !h.present {
+        h.suspicion.update(0.0, w.position, pt, dt);
+        h.last_visibility = Sight::default();
+        if h.schedule <= 0.0 {
+            h.present = true;
+            h.leaving = false;
+            h.schedule = PRESENT_TIME;
+            h.position = DOOR;
+            h.facing = flat(PATROL[1] - DOOR);
+            h.gaze = h.facing;
+            h.waypoint = 1;
+        }
+        **body_vis = Visibility::Hidden;
+        **head_vis = Visibility::Hidden;
+        return;
+    }
+    **body_vis = Visibility::Inherited;
+    **head_vis = Visibility::Inherited;
 
     // --- perception
-    let in_shadow = roach_in_shadow(&q, &w);
+    let in_shadow = roach_in_shadow(&q, w);
     h.in_shadow = in_shadow;
     let eye = h.position + Vec3::Y * EYE_HEIGHT;
     let target = Target {
@@ -189,54 +253,54 @@ pub fn update_human(
     };
     let vis = visibility(&Observer { eye, gaze: h.gaze }, &target, pt, &q);
     h.last_visibility = vis;
-    h.suspicion.update(vis.value, w.position, pt, dt);
+    h.suspicion.update(if playing { vis.value } else { 0.0 }, w.position, pt, dt);
     let awareness = h.suspicion.awareness(pt);
+    let detected = awareness == Awareness::Detected;
+    if detected && !h.was_detected && playing {
+        events.detected = true;
+    }
+    h.was_detected = detected;
 
     // --- comportement
     h.sweep_time += dt;
+    if h.schedule <= 0.0 && awareness == Awareness::Calm {
+        h.leaving = true;
+    }
     let mut desired_gaze;
-    let mut move_to: Option<(Vec3, f32)> = None;
     match awareness {
         Awareness::Calm => {
-            let wp = PATROL[h.waypoint];
-            if flat(wp - h.position) == Vec3::ZERO || (wp - h.position).length() < 10.0 {
-                h.waypoint = (h.waypoint + 1) % PATROL.len();
-            }
-            move_to = Some((PATROL[h.waypoint], WALK_SPEED));
-            // regard vers le bas devant soi (là où marchent les cafards), avec balayage
             let sweep = SWEEP_ANGLE * (h.sweep_time * TAU / SWEEP_PERIOD).sin();
             let ahead = Quat::from_rotation_y(sweep) * h.facing;
+            // regard vers le bas devant soi (là où courent les cafards), avec balayage
             desired_gaze = (ahead * 0.8 + Vec3::NEG_Y * 0.6).normalize();
+            if h.leaving {
+                if walk_towards(h, DOOR, WALK_SPEED, 0.0, dt) < 5.0 {
+                    h.present = false;
+                    h.schedule = AWAY_TIME;
+                }
+            } else {
+                let wp = PATROL[h.waypoint];
+                if walk_towards(h, wp, WALK_SPEED, 0.0, dt) < 10.0 {
+                    h.waypoint = (h.waypoint + 1) % PATROL.len();
+                }
+            }
         }
         Awareness::Notice => {
             let at = h.suspicion.last_seen.unwrap_or(w.position);
             desired_gaze = (at - eye).normalize();
+            let g = flat(desired_gaze);
+            if g != Vec3::ZERO {
+                h.facing = flat(turn_towards(h.facing, g, TURN_SPEED * dt)).normalize_or(h.facing);
+            }
         }
         Awareness::Search => {
             let at = h.suspicion.last_seen.unwrap_or(w.position);
             desired_gaze = (at - eye).normalize();
-            move_to = Some((at, SEARCH_SPEED));
+            walk_towards(h, at, SEARCH_SPEED, BODY_RADIUS, dt);
         }
         Awareness::Detected => {
             desired_gaze = (w.position - eye).normalize();
-            move_to = Some((w.position, CHASE_SPEED));
-        }
-    }
-    if let Some((to, speed)) = move_to {
-        let d = flat(to - h.position);
-        let dist = Vec3::new(to.x - h.position.x, 0.0, to.z - h.position.z).length();
-        let stop = if awareness == Awareness::Calm { 0.0 } else { BODY_RADIUS };
-        if d != Vec3::ZERO && dist > stop {
-            h.facing = flat(turn_towards(h.facing, d, TURN_SPEED * dt)).normalize_or(h.facing);
-            let step = (speed * dt).min(dist - stop);
-            let facing = h.facing;
-            h.position += facing * step;
-        }
-    } else if awareness != Awareness::Calm {
-        // à l'arrêt, le corps se tourne vers ce qu'il regarde
-        let g = flat(desired_gaze);
-        if g != Vec3::ZERO {
-            h.facing = flat(turn_towards(h.facing, g, TURN_SPEED * dt)).normalize_or(h.facing);
+            walk_towards(h, w.position, CHASE_SPEED, BODY_RADIUS * 0.5, dt);
         }
     }
     if desired_gaze.is_nan() {
@@ -244,21 +308,21 @@ pub fn update_human(
     }
     h.gaze = turn_towards(h.gaze, desired_gaze, TURN_SPEED * 1.5 * dt);
 
-    // --- écrasement : cafard au sol, détecté, sous un pied
-    h.squash_message = (h.squash_message - dt).max(0.0);
-    let horizontal = Vec3::new(w.position.x - h.position.x, 0.0, w.position.z - h.position.z).length();
+    // --- écrasement : cafard au sol, suspicion ≥ « cherche », sous un pied
     let on_floor = w.grounded && w.up.y > 0.7 && w.position.y < 3.0 * ROACH_RADIUS;
-    if h.suspicion.value >= pt.search && on_floor && horizontal < FOOT_RADIUS + pt.red_zone {
-        player.walker = Walker::new(SPAWN, Vec3::NEG_Z);
+    if playing
+        && h.suspicion.value >= pt.search
+        && on_floor
+        && horizontal_distance(w.position, h.position) < FOOT_RADIUS + pt.red_zone
+    {
+        events.squashed = true;
         h.suspicion.value = pt.search + 10.0; // reste méfiant
         h.suspicion.last_seen = None;
-        h.squash_message = 2.5;
     }
 
     // --- visuel
     body_tf.translation = h.position;
     body_tf.rotation = Quat::from_rotation_arc(Vec3::NEG_Z, h.facing);
-    let (head_tf, head_mat) = &mut *head;
     head_tf.translation = h.position + Vec3::Y * EYE_HEIGHT;
     head_tf.look_to(h.gaze, Vec3::Y);
     head_mat.0 = match awareness {
@@ -274,8 +338,8 @@ pub fn update_human(
         let half = pt.cone_focus * 0.5;
         let right = h.gaze.cross(Vec3::Y).normalize_or(Vec3::X);
         let up = right.cross(h.gaze).normalize_or(Vec3::Y);
-        for (a, b) in [(right, half), (-right, half), (up, half), (-up, half)] {
-            let d = Quat::from_axis_angle(a.cross(h.gaze).normalize_or(Vec3::Y), b) * h.gaze;
+        for a in [right, -right, up, -up] {
+            let d = Quat::from_axis_angle(a.cross(h.gaze).normalize_or(Vec3::Y), half) * h.gaze;
             gizmos.line(eye, eye + d * pt.range_max, Color::srgb(1.0, 0.9, 0.3).with_alpha(0.4));
         }
         gizmos.circle(

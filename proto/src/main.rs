@@ -15,6 +15,7 @@ use bevy::light::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 
+mod game_loop;
 mod human;
 
 use cockroach_proto::camera_rig::CameraRig;
@@ -25,7 +26,8 @@ use cockroach_proto::walker::{Mode, MoveInput, Walker};
 
 /// Rayon du corps du cafard (cm).
 const ROACH_RADIUS: f32 = 1.0;
-const SPAWN: Vec3 = Vec3::new(0.0, ROACH_RADIUS, 40.0);
+/// Point de départ : dans le refuge, sous le meuble bas.
+const SPAWN: Vec3 = Vec3::new(-120.0, ROACH_RADIUS, -125.0);
 /// Position du soleil (lumière directionnelle) : sert aussi au test d'ombre de la perception.
 const SUN_POSITION: Vec3 = Vec3::new(150.0, 200.0, 120.0);
 const MOUSE_SENSITIVITY: f32 = 0.0025; // rad / pixel
@@ -40,6 +42,7 @@ fn main() {
             }),
             PhysicsPlugins::default(),
             human::HumanPlugin,
+            game_loop::GameLoopPlugin,
         ))
         .insert_resource(ClearColor(Color::srgb(0.05, 0.05, 0.06)))
         .insert_resource(GlobalAmbientLight { brightness: 250.0, ..default() })
@@ -48,7 +51,7 @@ fn main() {
         .add_systems(Startup, (spawn_scene, spawn_player, spawn_hud))
         .add_systems(
             Update,
-            (read_input, step_player, human::update_human, update_camera, update_roach_visual, update_hud, draw_debug)
+            (read_input, step_player, human::update_human, game_loop::update_game, update_camera, update_roach_visual, update_hud, draw_debug)
                 .chain(),
         )
         .run();
@@ -160,7 +163,11 @@ fn spawn_scene(
         cuboid(&mut commands, Vec3::new(x, 36.5, z), Vec3::new(5.0, 73.0, 5.0), q0, wood.clone());
     }
     // Meuble bas + plan de travail en surplomb, frigo.
-    cuboid(&mut commands, Vec3::new(-120.0, 43.0, -127.0), Vec3::new(150.0, 86.0, 46.0), q0, cabinet);
+    // Meuble bas surélevé de 4 cm sur pieds : le dessous est le refuge du cafard.
+    cuboid(&mut commands, Vec3::new(-120.0, 45.0, -127.0), Vec3::new(150.0, 82.0, 46.0), q0, cabinet.clone());
+    for (x, z) in [(-192.0, -147.0), (-48.0, -147.0), (-192.0, -107.0), (-48.0, -107.0)] {
+        cuboid(&mut commands, Vec3::new(x, 2.0, z), Vec3::new(3.0, 4.0, 3.0), q0, cabinet.clone());
+    }
     cuboid(&mut commands, Vec3::new(-120.0, 88.0, -122.0), Vec3::new(156.0, 4.0, 56.0), q0, wood.clone());
     cuboid(&mut commands, Vec3::new(160.0, 90.0, -115.0), Vec3::new(70.0, 180.0, 70.0), q0, fridge);
     // Planche à découper debout (paroi fine : on passe d'une face à l'autre).
@@ -194,8 +201,9 @@ fn spawn_player(
     settings: Res<Settings>,
 ) {
     let t = &settings.tuning;
-    let walker = Walker::new(SPAWN, Vec3::NEG_Z);
-    let rig = CameraRig::new(0.0, (-8f32).to_radians());
+    let walker = Walker::new(SPAWN, Vec3::Z);
+    // caméra tournée vers la sortie du refuge (+Z)
+    let rig = CameraRig::new(std::f32::consts::PI, (-8f32).to_radians());
     commands.insert_resource(Player { walker, rig, frames: 0 });
 
     let chitin = materials.add(StandardMaterial {
@@ -279,6 +287,7 @@ fn read_input(
     let mut run = false;
     let mut jump = false;
     let mut cycle_arm = false;
+    let mut restart = false;
 
     if let Some(pad) = gamepads.iter().next() {
         stick = pad.left_stick();
@@ -286,6 +295,7 @@ fn read_input(
         run = pad.pressed(GamepadButton::East);
         jump = pad.pressed(GamepadButton::North);
         cycle_arm = pad.just_pressed(GamepadButton::LeftThumb);
+        restart = pad.just_pressed(GamepadButton::Start);
     }
     // KeyCode = position physique : W/A/S/D = Z/Q/S/D sur AZERTY.
     let axis = |neg: KeyCode, pos: KeyCode| (keys.pressed(pos) as i32 - keys.pressed(neg) as i32) as f32;
@@ -317,7 +327,7 @@ fn read_input(
     input.run = run;
     input.jump = jump;
     input.cycle_arm = cycle_arm;
-    input.reset = keys.just_pressed(KeyCode::KeyR);
+    input.reset = keys.just_pressed(KeyCode::KeyR) || restart;
     if keys.just_pressed(KeyCode::F1) {
         settings.debug = !settings.debug;
     }
@@ -328,14 +338,21 @@ fn step_player(
     input: Res<PlayerInput>,
     settings: Res<Settings>,
     spatial: SpatialQuery,
+    mut game: ResMut<game_loop::GameLoop>,
     mut player: ResMut<Player>,
 ) {
-    let t = &settings.tuning;
+    // Porter une miette ralentit ; piège collant ou fin de partie = immobile.
+    let mut tuning = settings.tuning.clone();
+    tuning.walk_speed *= game.speed_factor;
+    tuning.run_speed *= game.speed_factor;
+    let t = &tuning;
     let dt = time.delta_secs();
     let player = &mut *player;
     player.frames += 1;
-    if input.reset {
-        player.walker = Walker::new(SPAWN, Vec3::NEG_Z);
+    if input.reset && game.phase == game_loop::Phase::Playing {
+        // « replacer » : retour au refuge, mais on lâche la miette (pas de raccourci)
+        player.walker = Walker::new(SPAWN, Vec3::Z);
+        game.carrying = false;
     }
     if input.cycle_arm {
         player.rig.cycle_arm();
@@ -395,6 +412,7 @@ fn update_hud(
     player: Res<Player>,
     humans: Query<&human::Human>,
     tuning: Res<human::HumanTuning>,
+    game: Res<game_loop::GameLoop>,
     mut hud: Single<&mut Text, With<Hud>>,
 ) {
     let t = &settings.tuning;
@@ -408,8 +426,9 @@ fn update_hud(
     };
     let arm = t.arm_lengths[player.rig.arm_index];
     let fps = if time.delta_secs() > 0.0 { 1.0 / time.delta_secs() } else { 0.0 };
-    let mut human_line = String::new();
-    if let Some(h) = humans.iter().next() {
+    let human = humans.iter().next();
+    let mut human_line = game_loop::hud_lines(&game, human, w.position);
+    if let Some(h) = human.filter(|h| h.present) {
         let s = h.suspicion.value;
         let filled = (s / 5.0).round() as usize;
         let state = match h.suspicion.awareness(&tuning.0) {
@@ -419,7 +438,7 @@ fn update_hud(
             Awareness::Detected => "DETECTE !",
         };
         let v = h.last_visibility;
-        human_line = format!(
+        human_line += &format!(
             "Humain : [{}{}] {s:.0}/100 {state}   vu : {:.2} (dist {:.0} cm{}{})\n",
             "#".repeat(filled.min(20)),
             "-".repeat(20 - filled.min(20)),
@@ -428,9 +447,6 @@ fn update_hud(
             if v.line_of_sight { "" } else { ", cache" },
             if h.in_shadow { ", ombre" } else { "" },
         );
-        if h.squash_message > 0.0 {
-            human_line.push_str("*** ECRASE ! ***\n");
-        }
     }
     hud.0 = human_line + &format!(
         "COCKROACH - prototype   ({fps:.0} i/s)\n\
@@ -440,7 +456,7 @@ fn update_hud(
          \n\
          Manette : stick G marcher | stick D camera | B courir | Y sauter | clic stick G distance\n\
          Clavier : ZQSD/WASD | souris (clic) | Maj courir | Espace sauter | Tab distance\n\
-         F1 debug sondes | R replacer",
+         F1 debug sondes | R replacer (lache la miette) | R/Start rejouer apres la fin",
         w.mode,
         speed / t.body_radius,
         w.stamina * 100.0,
