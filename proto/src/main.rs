@@ -15,7 +15,10 @@ use bevy::light::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 
+mod human;
+
 use cockroach_proto::camera_rig::CameraRig;
+use cockroach_proto::perception::Awareness;
 use cockroach_proto::query::{Hit, SurfaceQuery};
 use cockroach_proto::tuning::Tuning;
 use cockroach_proto::walker::{Mode, MoveInput, Walker};
@@ -23,6 +26,8 @@ use cockroach_proto::walker::{Mode, MoveInput, Walker};
 /// Rayon du corps du cafard (cm).
 const ROACH_RADIUS: f32 = 1.0;
 const SPAWN: Vec3 = Vec3::new(0.0, ROACH_RADIUS, 40.0);
+/// Position du soleil (lumière directionnelle) : sert aussi au test d'ombre de la perception.
+const SUN_POSITION: Vec3 = Vec3::new(150.0, 200.0, 120.0);
 const MOUSE_SENSITIVITY: f32 = 0.0025; // rad / pixel
 const LOOK_DEADZONE: f32 = 0.15;
 
@@ -34,6 +39,7 @@ fn main() {
                 ..default()
             }),
             PhysicsPlugins::default(),
+            human::HumanPlugin,
         ))
         .insert_resource(ClearColor(Color::srgb(0.05, 0.05, 0.06)))
         .insert_resource(GlobalAmbientLight { brightness: 250.0, ..default() })
@@ -42,7 +48,8 @@ fn main() {
         .add_systems(Startup, (spawn_scene, spawn_player, spawn_hud))
         .add_systems(
             Update,
-            (read_input, step_player, update_camera, update_roach_visual, update_hud, draw_debug).chain(),
+            (read_input, step_player, human::update_human, update_camera, update_roach_visual, update_hud, draw_debug)
+                .chain(),
         )
         .run();
 }
@@ -175,7 +182,7 @@ fn spawn_scene(
     // Lumière : soleil rasant par la fenêtre + ambiance faible.
     commands.spawn((
         DirectionalLight { illuminance: 6000.0, shadow_maps_enabled: true, ..default() },
-        Transform::from_xyz(150.0, 200.0, 120.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_translation(SUN_POSITION).looking_at(Vec3::ZERO, Vec3::Y),
         CascadeShadowConfigBuilder { maximum_distance: 600.0, first_cascade_far_bound: 40.0, ..default() }.build(),
     ));
 }
@@ -386,6 +393,8 @@ fn update_hud(
     time: Res<Time>,
     settings: Res<Settings>,
     player: Res<Player>,
+    humans: Query<&human::Human>,
+    tuning: Res<human::HumanTuning>,
     mut hud: Single<&mut Text, With<Hud>>,
 ) {
     let t = &settings.tuning;
@@ -399,7 +408,31 @@ fn update_hud(
     };
     let arm = t.arm_lengths[player.rig.arm_index];
     let fps = if time.delta_secs() > 0.0 { 1.0 / time.delta_secs() } else { 0.0 };
-    hud.0 = format!(
+    let mut human_line = String::new();
+    if let Some(h) = humans.iter().next() {
+        let s = h.suspicion.value;
+        let filled = (s / 5.0).round() as usize;
+        let state = match h.suspicion.awareness(&tuning.0) {
+            Awareness::Calm => "calme",
+            Awareness::Notice => "REMARQUE",
+            Awareness::Search => "CHERCHE",
+            Awareness::Detected => "DETECTE !",
+        };
+        let v = h.last_visibility;
+        human_line = format!(
+            "Humain : [{}{}] {s:.0}/100 {state}   vu : {:.2} (dist {:.0} cm{}{})\n",
+            "#".repeat(filled.min(20)),
+            "-".repeat(20 - filled.min(20)),
+            v.value,
+            v.distance,
+            if v.line_of_sight { "" } else { ", cache" },
+            if h.in_shadow { ", ombre" } else { "" },
+        );
+        if h.squash_message > 0.0 {
+            human_line.push_str("*** ECRASE ! ***\n");
+        }
+    }
+    hud.0 = human_line + &format!(
         "COCKROACH - prototype   ({fps:.0} i/s)\n\
          Etat : {:?}   vitesse : {speed:.1} cm/s ({:.1} corps/s)\n\
          Surface : {surface_name} ({surface:.0} deg)   endurance : {:.0} %\n\

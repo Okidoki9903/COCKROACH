@@ -97,8 +97,8 @@ if visible == 0: suspicion -= decay * dt après un délai de grâce
 
 | Paramètre | Valeur de départ | Justification |
 |---|---|---|
-| `range_max` | 107 R (≈ 1,1 m pour R = 1 cm) | = portée de détection de Les Fourmis (1500 u / 14) |
-| `range_near` | 18 R | = bande « brûlante » du sonar (250 u) |
+| `range_max` | **2,8 × hauteur des yeux** (≈ 4,5 m : toute la cuisine) | Les Fourmis : 1500 u = 107 R, une portée relative à la taille de *l'observateur* (fourmi). Transposé tel quel (107 R = 1,07 m), un humain aux yeux à 1,6 m ne verrait jamais un cafard au sol : on la rapporte donc à l'humain (bug révélé par les tests du prototype) |
+| `range_near` | 0,75 × hauteur des yeux (≈ 1,2 m) | proportion bande brûlante / portée max de Les Fourmis ≈ 1/6, élargie pour un humain qui regarde ses pieds |
 | `cone_focus` / `cone_peripheral` | 30° / 120°, `peripheral_gain = 0,3` | vision humaine, fovéa et périphérie |
 | `speed_ref` / `idle_floor` | vitesse de course (50 R/s) / 0,05 | immobile = quasi invisible (Bible : se cacher) |
 | `gain` | 100 / 1,5 s | un cafard en pleine lumière, au centre du regard, qui court, est repéré en 1,5 s |
@@ -115,8 +115,9 @@ vibrations dans la zone jaune.
 
 ### B.4 Critères d'acceptation (prototype)
 
-1. Un cafard immobile dans l'ombre, à 50 R, dans le champ central, n'atteint pas 30 en 10 s.
-2. Un cafard qui court en pleine lumière à 30 R, dans le champ central, atteint 100 en moins de 2 s.
+1. Un cafard immobile dans l'ombre, à ~2 m, dans le champ central, n'atteint pas 30 en 10 s.
+2. Un cafard qui court en pleine lumière aux pieds de l'humain, dans le champ central, atteint 100 en moins de 2 s ;
+   à l'autre bout de la cuisine (~4 m), il reste visible mais plus lentement.
 3. Un cafard derrière un obstacle (ligne de vue bloquée) n'augmente jamais la suspicion.
 4. Hors du cône périphérique (dans le dos de l'humain), la suspicion n'augmente pas.
 5. La suspicion retombe de 60 à 0 en moins de 15 s une fois le cafard caché.
