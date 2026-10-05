@@ -14,6 +14,8 @@
 --   F7  snapshot des paramètres (caméra, mouvement, cine camera…) -> params_*.txt
 --   F8  marqueur d'événement dans le CSV (ex : "début montée mur") — incrémente le compteur
 --   F9  inspection : classes + propriétés du pawn et des objets liés -> inspect_*.txt
+--   F10 perception : réglages de détection (niveau, clans, tables, faune) + unités proches -> perception_*.txt
+--   (F6 écrit aussi units_*.csv : unités à moins de 5000 u, état, portée de détection, cible poursuivie)
 --
 -- Sorties : dossier <Win64>/ue4ss/Mods/CockroachProbe/out/ (créé par install_probe.ps1)
 
@@ -173,11 +175,57 @@ local function sample()
 end
 
 local loopHandle = nil
+local ucsv = nil         -- unités proches (perception), ~10 Hz
+local frameCount = 0
+local UNIT_EVERY = 6     -- images entre deux relevés d'unités
+local UNIT_RADIUS = 5000 -- u autour du joueur
+local UHEADER = "game_t,marker,id,type,category,clan,state,substate,transition,x,y,z,dist,"
+    .. "detection_range,fight_radius,chased_unit,chased_general,moving,agents,health,max_health,vagabond,player_x,player_y,player_z"
+
+local function getGameState()
+    if ok(cache.gameState) then return cache.gameState end
+    cache.gameState = FindFirstOf("EmpireGameState")
+    return cache.gameState
+end
+
+local function sampleUnits()
+    local gs = getGameState()
+    if not ok(gs) or ucsv == nil then return end
+    local pc = cache.pc
+    local pawn = pc and getPawn(pc) or nil
+    if pawn == nil then return end
+    local pl = try(function() return pawn:K2_GetActorLocation() end)
+    if pl == nil then return end
+    local px, py, pz = pl.X, pl.Y, pl.Z
+    local gt = num(gameTime())
+    local arr = try(function() return gs.m_unitsPrivate end)
+    if arr == nil then return end
+    arr:ForEach(function(_, elem)
+        pcall(function()
+            local u = elem:get()
+            local tr = u.m_transform.Translation
+            local dx, dy, dz = tr.X - px, tr.Y - py, tr.Z - pz
+            local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
+            if dist > UNIT_RADIUS then return end
+            ucsv:write(table.concat({
+                gt, tostring(marker), num(u.m_id, "%d"), num(u.m_type, "%d"), num(u.m_category, "%d"),
+                num(u.m_clan, "%d"), num(u.m_behaviourState, "%d"), num(u.m_behaviourSubstate, "%d"),
+                num(u.m_behaviourTransition, "%d"),
+                string.format("%.2f,%.2f,%.2f", tr.X, tr.Y, tr.Z), string.format("%.2f", dist),
+                num(u.m_detectionRange, "%.2f"), num(u.m_fightRadius, "%.2f"), num(u.m_chasedUnitId, "%d"),
+                num(u.m_chasedGeneral, "%d"), num(u.m_isMoving), num(u.m_agentCount, "%d"),
+                num(u.m_healthPoints, "%.1f"), num(u.m_maxHealthPoints, "%.1f"), num(u.m_isVagabond),
+                string.format("%.2f,%.2f,%.2f", px, py, pz),
+            }, ","), "\n")
+        end)
+    end)
+end
 local recGen = 0 -- numéro d'enregistrement : une vieille boucle survivante ne doit rien faire
 
 local function closeCsv()
     local wasOpen = csv ~= nil
     if csv ~= nil then csv:close() csv = nil end
+    if ucsv ~= nil then ucsv:close() ucsv = nil end
     recording = false
     stopRequested = false
     -- Dans cette version d'UE4SS, "return true" n'arrête pas la boucle : on l'annule par son handle.
@@ -197,6 +245,9 @@ local function startRecording()
         return
     end
     csv:write(HEADER, "\n")
+    ucsv = io.open((name:gsub("frames_", "units_")), "w")
+    if ucsv ~= nil then ucsv:write(UHEADER, "\n") end
+    frameCount = 0
     t0 = os.clock()
     marker = 0
     stopRequested = false
@@ -213,6 +264,11 @@ local function startRecording()
         end
         local s, e = pcall(sample)
         if not s then print("[CockroachProbe] sample erreur: " .. tostring(e) .. "\n") end
+        frameCount = frameCount + 1
+        if frameCount % UNIT_EVERY == 0 then
+            local s2, e2 = pcall(sampleUnits)
+            if not s2 then print("[CockroachProbe] units erreur: " .. tostring(e2) .. "\n") end
+        end
         return false
     end)
 end
@@ -322,6 +378,111 @@ local function inspect()
     print("[CockroachProbe] inspect -> " .. name .. "\n")
 end
 
+-- F10 : réglages de perception (niveau, clans, tables de données, faune, unités proches).
+local function writeFields(f, prefix, obj, fields)
+    local parts = {}
+    for _, k in ipairs(fields) do
+        local v = try(function() return obj[k] end)
+        if type(v) == "userdata" then v = try(function() return v:ToString() end, fmt(v)) end
+        parts[#parts + 1] = k .. "=" .. tostring(v)
+    end
+    f:write(prefix, table.concat(parts, "  "), "\n")
+end
+
+local CORESTAT_FIELDS = { "DetectionRange", "PlayerDetectionRange", "CreepsDetectionRangeFactor", "StandardUnitSpeed",
+    "StandardCohesionRadius", "UnitBreakFightDuration", "IdleHealSpeed", "HostileUnitDamagesPerSec", "CreepDamagesPerSec",
+    "CreepRedZoneRatio", "CreepYellowZoneRatio", "AttritionTimeToKill" }
+local UNITSTAT_FIELDS = { "TypeUnit", "UnitName", "Category", "Tier", "IsAntUnit", "Movement", "MaxAgents", "Moral",
+    "Cohesion", "AggroRadiusFactor", "MeleeSlotsNumber", "BreakFightDurationFactor" }
+local CLAN_FIELDS = { "Clan", "Alliance", "Civilization", "PlayerType", "DetectionTime", "DetectionRangeModifier",
+    "Personality", "ThinkSpeed", "Wisdom", "ArmyCount", "StartEnabled" }
+
+local function perception()
+    local name = OUT_DIR .. "perception_" .. os.date("%Y%m%d_%H%M%S") .. ".txt"
+    local f = io.open(name, "w")
+    if f == nil then return end
+    f:write("# game_t: ", num(gameTime()), "\n")
+
+    local lvl = FindFirstOf("SimulatedLevel")
+    f:write("\n==== Niveau : ", fullName(lvl), "\n")
+    if ok(lvl) then
+        writeFields(f, "  ", lvl, { "ColdDetectionDistance", "TepidDetectionDistance", "WarmDetectionDistance",
+            "SizzlingDetectionDistance", "HotDetectionDistance" })
+        local clans = try(function() return lvl.ClansSetup end)
+        if clans ~= nil then
+            clans:ForEach(function(i, elem)
+                pcall(function() writeFields(f, "  clan[" .. i .. "] ", elem:get(), CLAN_FIELDS) end)
+            end)
+        end
+    end
+
+    local dts = FindAllOf("DataTable") or {}
+    for _, dt in ipairs(dts) do
+        if ok(dt) then
+            local rs = try(function() return dt.RowStruct:GetFName():ToString() end, "?")
+            local fields = (rs == "CoreStat" and CORESTAT_FIELDS) or (rs == "UnitStats" and UNITSTAT_FIELDS) or nil
+            if fields ~= nil then
+                f:write("\n==== DataTable ", fullName(dt), " (", rs, ")\n")
+                local okRows = pcall(function()
+                    dt:ForEachRow(function(rowName, row)
+                        local rn = try(function() return rowName:ToString() end, tostring(rowName))
+                        writeFields(f, "  [" .. rn .. "] ", row, fields)
+                    end)
+                end)
+                if not okRows then f:write("  (ForEachRow indisponible)\n") end
+            end
+        end
+    end
+
+    local function dumpAll(cls, fields)
+        local all = FindAllOf(cls) or {}
+        f:write("\n==== ", cls, " (", #all, ")\n")
+        for i, o in ipairs(all) do
+            if ok(o) and i <= 40 then
+                local loc = try(function() return o:K2_GetActorLocation() end)
+                writeFields(f, "  " .. vec(loc) .. "  ", o, fields)
+            end
+        end
+    end
+    dumpAll("JumpingSpiderWaypoint", { "PlayerFleeRange", "PlayerAlertRange" })
+    dumpAll("JumpingSpider", { "JumpSpeed", "BaseJumpHeight", "JumpRotationSpeed", "AlertRotationSpeed" })
+    dumpAll("BreathingWorldFollowerSpawner", { "PlayerHearingRange", "AgentSpeed", "AmountToSpawn", "DivergenceFactor" })
+    dumpAll("BreathingWorldSecurityLine", { "AgentsDistance", "BlockerForwardDist", "BlockerBoundaryDist" })
+
+    local pc = getPC()
+    local pawn = pc and getPawn(pc) or nil
+    if pawn ~= nil then
+        f:write("\n==== Joueur\n")
+        writeFields(f, "  ", pawn, { "NestDetectionSphereRadius", "ResourceDetectionSphereRadius",
+            "ForagingDetectionSphereRadius", "SpideySenseTickInterval", "SpideySenseTickNumber", "BarrierInteractionRadius" })
+    end
+
+    -- Résumé des unités proches : état et portée de détection.
+    local gs = getGameState()
+    if ok(gs) and pawn ~= nil then
+        local pl = pawn:K2_GetActorLocation()
+        f:write("\n==== Unités à moins de ", UNIT_RADIUS, " u\n")
+        pcall(function()
+            gs.m_unitsPrivate:ForEach(function(_, elem)
+                pcall(function()
+                    local u = elem:get()
+                    local tr = u.m_transform.Translation
+                    local d = math.sqrt((tr.X - pl.X) ^ 2 + (tr.Y - pl.Y) ^ 2 + (tr.Z - pl.Z) ^ 2)
+                    if d <= UNIT_RADIUS then
+                        f:write(string.format(
+                            "  id=%s type=%s cat=%s clan=%s state=%s dist=%.0f detection=%s fight=%s chasedGeneral=%s\n",
+                            tostring(u.m_id), tostring(u.m_type), tostring(u.m_category), tostring(u.m_clan),
+                            tostring(u.m_behaviourState), d, tostring(u.m_detectionRange), tostring(u.m_fightRadius),
+                            tostring(u.m_chasedGeneral)))
+                    end
+                end)
+            end)
+        end)
+    end
+    f:close()
+    print("[CockroachProbe] perception -> " .. name .. "\n")
+end
+
 local function guarded(label, fn)
     return function()
         ExecuteInGameThread(function()
@@ -341,10 +502,11 @@ end)
 
 RegisterKeyBind(Key.F7, guarded("snapshot", snapshot))
 RegisterKeyBind(Key.F9, guarded("inspect", inspect))
+RegisterKeyBind(Key.F10, guarded("perception", perception))
 
 RegisterKeyBind(Key.F8, function()
     marker = marker + 1
     print("[CockroachProbe] marker " .. marker .. "\n")
 end)
 
-print("[CockroachProbe] chargé. F6=REC  F7=snapshot  F8=marker  F9=inspect  out=" .. OUT_DIR .. "\n")
+print("[CockroachProbe] chargé. F6=REC  F7=snapshot  F8=marker  F9=inspect  F10=perception  out=" .. OUT_DIR .. "\n")
