@@ -134,6 +134,7 @@ local HEADER = table.concat({
     "cine_x,cine_y,cine_z",
     "focal",
     "move_mode", "running", "in_air",
+    "damaged", "dying",
 }, ",")
 
 local function sample()
@@ -170,6 +171,8 @@ local function sample()
         num(ok(move) and try(function() return move:GetMode() end) or nil, "%d"),
         num(ok(move) and try(function() return move:IsRunning() end) or nil),
         num(ok(move) and try(function() return move:IsInAir() end) or nil),
+        num(try(function() return pawn:IsReceivingDamages() end)),
+        num(try(function() return pawn:IsDying() end)),
     }, ",")
     csv:write(line, "\n")
 end
