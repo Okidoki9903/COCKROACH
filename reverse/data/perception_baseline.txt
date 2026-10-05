@@ -120,3 +120,10 @@
   NestDetectionSphereRadius=200.0  ResourceDetectionSphereRadius=400.0  ForagingDetectionSphereRadius=400.0  SpideySenseTickInterval=2.0  SpideySenseTickNumber=5  BarrierInteractionRadius=40.0
 
   total unités=0  lectures échouées=0  tableau=true 
+
+# --- Mission H1M3E3 (didacticiel stratégique), perception_20261005_110326.txt
+==== Niveau : BP_MissionLevel_C 
+  ColdDetectionDistance=2000.0  TepidDetectionDistance=1500.0  WarmDetectionDistance=1000.0  SizzlingDetectionDistance=750.0  HotDetectionDistance=250.0
+  clan[1] Clan=0  Alliance=0  Civilization=0  PlayerType=0  DetectionTime=0.0  DetectionRangeModifier=1.0  Personality=2  ThinkSpeed=2  Wisdom=2  ArmyCount=2  StartEnabled=true
+  clan[2] Clan=1  Alliance=1  Civilization=0  PlayerType=2  DetectionTime=0.0  DetectionRangeModifier=1.0  Personality=2  ThinkSpeed=2  Wisdom=2  ArmyCount=2  StartEnabled=true
+  clan[3] Clan=8  Alliance=8  Civilization=0  PlayerType=3  DetectionTime=0.0  DetectionRangeModifier=1.0  Personality=2  ThinkSpeed=2  Wisdom=2  ArmyCount=2  StartEnabled=true
